@@ -1,5 +1,5 @@
-import type { LinksFunction } from "@remix-run/node";
-import { json } from "@remix-run/node";
+import type { LinksFunction } from "@remix-run/cloudflare";
+import { json } from "@remix-run/cloudflare";
 import {
   Form,
   Link,

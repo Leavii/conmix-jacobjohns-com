@@ -1,5 +1,5 @@
-import type { LoaderFunctionArgs } from "@remix-run/node";
-import { json } from "@remix-run/node";
+import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
+import { json } from "@remix-run/cloudflare";
 import { Form, useLoaderData } from "@remix-run/react";
 import type { FunctionComponent } from "react";
 import type { ContactRecord } from "../data";
