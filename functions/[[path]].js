@@ -997,14 +997,14 @@ function convertRouteMatchToUiMatch(match, loaderData) {
 function flattenRoutes(routes2, branches, parentsMeta, parentPath) {
   branches === void 0 && (branches = []), parentsMeta === void 0 && (parentsMeta = []), parentPath === void 0 && (parentPath = "");
   let flattenRoute = (route, index, relativePath) => {
-    let meta = {
+    let meta2 = {
       relativePath: relativePath === void 0 ? route.path || "" : relativePath,
       caseSensitive: route.caseSensitive === !0,
       childrenIndex: index,
       route
     };
-    meta.relativePath.startsWith("/") && (invariant(meta.relativePath.startsWith(parentPath), 'Absolute route path "' + meta.relativePath + '" nested under path ' + ('"' + parentPath + '" is not valid. An absolute child route path ') + "must start with the combined path of all its parent routes."), meta.relativePath = meta.relativePath.slice(parentPath.length));
-    let path = joinPaths([parentPath, meta.relativePath]), routesMeta = parentsMeta.concat(meta);
+    meta2.relativePath.startsWith("/") && (invariant(meta2.relativePath.startsWith(parentPath), 'Absolute route path "' + meta2.relativePath + '" nested under path ' + ('"' + parentPath + '" is not valid. An absolute child route path ') + "must start with the combined path of all its parent routes."), meta2.relativePath = meta2.relativePath.slice(parentPath.length));
+    let path = joinPaths([parentPath, meta2.relativePath]), routesMeta = parentsMeta.concat(meta2);
     route.children && route.children.length > 0 && (invariant(
       // Our types know better, but runtime JS may not!
       // @ts-expect-error
@@ -1036,7 +1036,7 @@ function explodeOptionalSegments(path) {
   return result.push(...restExploded.map((subpath) => subpath === "" ? required : [required, subpath].join("/"))), isOptional && result.push(...restExploded), result.map((exploded) => path.startsWith("/") && exploded === "" ? "/" : exploded);
 }
 function rankRouteBranches(branches) {
-  branches.sort((a, b) => a.score !== b.score ? b.score - a.score : compareIndexes(a.routesMeta.map((meta) => meta.childrenIndex), b.routesMeta.map((meta) => meta.childrenIndex)));
+  branches.sort((a, b) => a.score !== b.score ? b.score - a.score : compareIndexes(a.routesMeta.map((meta2) => meta2.childrenIndex), b.routesMeta.map((meta2) => meta2.childrenIndex)));
 }
 function computeScore(path, index) {
   let segments = path.split("/"), initialScore = segments.length;
@@ -1060,15 +1060,15 @@ function matchRouteBranch(branch, pathname) {
     routesMeta
   } = branch, matchedParams = {}, matchedPathname = "/", matches = [];
   for (let i = 0; i < routesMeta.length; ++i) {
-    let meta = routesMeta[i], end = i === routesMeta.length - 1, remainingPathname = matchedPathname === "/" ? pathname : pathname.slice(matchedPathname.length) || "/", match = matchPath({
-      path: meta.relativePath,
-      caseSensitive: meta.caseSensitive,
+    let meta2 = routesMeta[i], end = i === routesMeta.length - 1, remainingPathname = matchedPathname === "/" ? pathname : pathname.slice(matchedPathname.length) || "/", match = matchPath({
+      path: meta2.relativePath,
+      caseSensitive: meta2.caseSensitive,
       end
     }, remainingPathname);
     if (!match)
       return null;
     Object.assign(matchedParams, match.params);
-    let route = meta.route;
+    let route = meta2.route;
     matches.push({
       // TODO: Can this as be avoided?
       params: matchedParams,
@@ -1083,7 +1083,7 @@ function generatePath(originalPath, params) {
   params === void 0 && (params = {});
   let path = originalPath;
   path.endsWith("*") && path !== "*" && !path.endsWith("/*") && (warning(!1, 'Route path "' + path + '" will be treated as if it were ' + ('"' + path.replace(/\*$/, "/*") + '" because the `*` character must ') + "always follow a `/` in the pattern. To get rid of this warning, " + ('please change the route path to "' + path.replace(/\*$/, "/*") + '".')), path = path.replace(/\*$/, "/*"));
-  let prefix2 = path.startsWith("/") ? "/" : "", stringify = (p) => p == null ? "" : typeof p == "string" ? p : String(p), segments = path.split(/\/+/).map((segment, index, array) => {
+  let prefix = path.startsWith("/") ? "/" : "", stringify = (p) => p == null ? "" : typeof p == "string" ? p : String(p), segments = path.split(/\/+/).map((segment, index, array) => {
     if (index === array.length - 1 && segment === "*")
       return stringify(params["*"]);
     let keyMatch = segment.match(/^:([\w-]+)(\??)$/);
@@ -1093,15 +1093,15 @@ function generatePath(originalPath, params) {
     }
     return segment.replace(/\?$/g, "");
   }).filter((segment) => !!segment);
-  return prefix2 + segments.join("/");
+  return prefix + segments.join("/");
 }
-function matchPath(pattern2, pathname) {
-  typeof pattern2 == "string" && (pattern2 = {
-    path: pattern2,
+function matchPath(pattern, pathname) {
+  typeof pattern == "string" && (pattern = {
+    path: pattern,
     caseSensitive: !1,
     end: !0
   });
-  let [matcher, compiledParams] = compilePath(pattern2.path, pattern2.caseSensitive, pattern2.end), match = pathname.match(matcher);
+  let [matcher, compiledParams] = compilePath(pattern.path, pattern.caseSensitive, pattern.end), match = pathname.match(matcher);
   if (!match)
     return null;
   let matchedPathname = match[0], pathnameBase = matchedPathname.replace(/(.)\/+$/, "$1"), captureGroups = match.slice(1);
@@ -1120,7 +1120,7 @@ function matchPath(pattern2, pathname) {
     }, {}),
     pathname: matchedPathname,
     pathnameBase,
-    pattern: pattern2
+    pattern
   };
 }
 function compilePath(path, caseSensitive, end) {
@@ -2387,7 +2387,7 @@ function normalizeNavigateOptions(normalizeFormMethod, isFetcher, path, opts) {
       if (!isMutationMethod(formMethod))
         return getInvalidBodyError();
       try {
-        let json6 = typeof opts.body == "string" ? JSON.parse(opts.body) : opts.body;
+        let json4 = typeof opts.body == "string" ? JSON.parse(opts.body) : opts.body;
         return {
           path,
           submission: {
@@ -2395,7 +2395,7 @@ function normalizeNavigateOptions(normalizeFormMethod, isFetcher, path, opts) {
             formAction,
             formEncType: opts.formEncType,
             formData: void 0,
-            json: json6,
+            json: json4,
             text: void 0
           }
         };
@@ -2886,7 +2886,7 @@ function getSubmissionFromNavigation(navigation) {
     formEncType,
     text,
     formData,
-    json: json6
+    json: json4
   } = navigation;
   if (!(!formMethod || !formAction || !formEncType)) {
     if (text != null)
@@ -2907,13 +2907,13 @@ function getSubmissionFromNavigation(navigation) {
         json: void 0,
         text: void 0
       };
-    if (json6 !== void 0)
+    if (json4 !== void 0)
       return {
         formMethod,
         formAction,
         formEncType,
         formData: void 0,
-        json: json6,
+        json: json4,
         text: void 0
       };
   }
@@ -3000,8 +3000,8 @@ function restoreAppliedTransitions(_window, transitions) {
   try {
     let sessionPositions = _window.sessionStorage.getItem(TRANSITIONS_STORAGE_KEY);
     if (sessionPositions) {
-      let json6 = JSON.parse(sessionPositions);
-      for (let [k, v] of Object.entries(json6 || {}))
+      let json4 = JSON.parse(sessionPositions);
+      for (let [k, v] of Object.entries(json4 || {}))
         v && Array.isArray(v) && transitions.set(k, new Set(v || []));
     }
   } catch {
@@ -3009,11 +3009,11 @@ function restoreAppliedTransitions(_window, transitions) {
 }
 function persistAppliedTransitions(_window, transitions) {
   if (transitions.size > 0) {
-    let json6 = {};
+    let json4 = {};
     for (let [k, v] of transitions)
-      json6[k] = [...v];
+      json4[k] = [...v];
     try {
-      _window.sessionStorage.setItem(TRANSITIONS_STORAGE_KEY, JSON.stringify(json6));
+      _window.sessionStorage.setItem(TRANSITIONS_STORAGE_KEY, JSON.stringify(json4));
     } catch (error) {
       warning(!1, "Failed to save applied view transitions in sessionStorage (" + error + ").");
     }
@@ -3486,12 +3486,12 @@ async function callRouteActionRR({
 }
 async function callRouteLoaderRR({
   loadContext,
-  loader: loader3,
+  loader,
   params,
   request,
   routeId
 }) {
-  let result = await loader3({
+  let result = await loader({
     request: stripDataParam(stripIndexParam(request)),
     context: loadContext,
     params
@@ -5115,18 +5115,18 @@ See https://reactjs.org/link/invalid-hook-call for tips about how to debug and f
           disabledDepth < 0 && error("disabledDepth fell below zero. This is a bug in React. Please file an issue.");
         }
       }
-      var ReactCurrentDispatcher$1 = ReactSharedInternals.ReactCurrentDispatcher, prefix2;
+      var ReactCurrentDispatcher$1 = ReactSharedInternals.ReactCurrentDispatcher, prefix;
       function describeBuiltInComponentFrame(name, source, ownerFn) {
         {
-          if (prefix2 === void 0)
+          if (prefix === void 0)
             try {
               throw Error();
             } catch (x) {
               var match = x.stack.trim().match(/\n( *(at )?)/);
-              prefix2 = match && match[1] || "";
+              prefix = match && match[1] || "";
             }
           return `
-` + prefix2 + name;
+` + prefix + name;
         }
       }
       var reentry = !1, componentFrameCache;
@@ -5868,7 +5868,7 @@ var require_react_dom_development = __commonJS({
           argsWithFormat.unshift("Warning: " + format), Function.prototype.apply.call(console[level], console, argsWithFormat);
         }
       }
-      var FunctionComponent = 0, ClassComponent = 1, IndeterminateComponent = 2, HostRoot = 3, HostPortal = 4, HostComponent = 5, HostText = 6, Fragment6 = 7, Mode = 8, ContextConsumer = 9, ContextProvider = 10, ForwardRef = 11, Profiler = 12, SuspenseComponent = 13, MemoComponent = 14, SimpleMemoComponent = 15, LazyComponent = 16, IncompleteClassComponent = 17, DehydratedFragment = 18, SuspenseListComponent = 19, ScopeComponent = 21, OffscreenComponent = 22, LegacyHiddenComponent = 23, CacheComponent = 24, TracingMarkerComponent = 25, enableClientRenderFallbackOnTextMismatch = !0, enableNewReconciler = !1, enableLazyContextPropagation = !1, enableLegacyHidden = !1, enableSuspenseAvoidThisFallback = !1, disableCommentsAsDOMContainers = !0, enableCustomElementPropertySupport = !1, warnAboutStringRefs = !1, enableSchedulingProfiler = !0, enableProfilerTimer = !0, enableProfilerCommitHooks = !0, allNativeEvents = /* @__PURE__ */ new Set(), registrationNameDependencies = {}, possibleRegistrationNames = {};
+      var FunctionComponent = 0, ClassComponent = 1, IndeterminateComponent = 2, HostRoot = 3, HostPortal = 4, HostComponent = 5, HostText = 6, Fragment4 = 7, Mode = 8, ContextConsumer = 9, ContextProvider = 10, ForwardRef = 11, Profiler = 12, SuspenseComponent = 13, MemoComponent = 14, SimpleMemoComponent = 15, LazyComponent = 16, IncompleteClassComponent = 17, DehydratedFragment = 18, SuspenseListComponent = 19, ScopeComponent = 21, OffscreenComponent = 22, LegacyHiddenComponent = 23, CacheComponent = 24, TracingMarkerComponent = 25, enableClientRenderFallbackOnTextMismatch = !0, enableNewReconciler = !1, enableLazyContextPropagation = !1, enableLegacyHidden = !1, enableSuspenseAvoidThisFallback = !1, disableCommentsAsDOMContainers = !0, enableCustomElementPropertySupport = !1, warnAboutStringRefs = !1, enableSchedulingProfiler = !0, enableProfilerTimer = !0, enableProfilerCommitHooks = !0, allNativeEvents = /* @__PURE__ */ new Set(), registrationNameDependencies = {}, possibleRegistrationNames = {};
       function registerTwoPhaseEvent(registrationName, dependencies) {
         registerDirectEvent(registrationName, dependencies), registerDirectEvent(registrationName + "Capture", dependencies);
       }
@@ -5941,8 +5941,8 @@ var require_react_dom_development = __commonJS({
               return !1;
             if (propertyInfo !== null)
               return !propertyInfo.acceptsBooleans;
-            var prefix3 = name.toLowerCase().slice(0, 5);
-            return prefix3 !== "data-" && prefix3 !== "aria-";
+            var prefix2 = name.toLowerCase().slice(0, 5);
+            return prefix2 !== "data-" && prefix2 !== "aria-";
           }
           default:
             return !1;
@@ -6476,18 +6476,18 @@ var require_react_dom_development = __commonJS({
           disabledDepth < 0 && error("disabledDepth fell below zero. This is a bug in React. Please file an issue.");
         }
       }
-      var ReactCurrentDispatcher = ReactSharedInternals.ReactCurrentDispatcher, prefix2;
+      var ReactCurrentDispatcher = ReactSharedInternals.ReactCurrentDispatcher, prefix;
       function describeBuiltInComponentFrame(name, source, ownerFn) {
         {
-          if (prefix2 === void 0)
+          if (prefix === void 0)
             try {
               throw Error();
             } catch (x) {
               var match = x.stack.trim().match(/\n( *(at )?)/);
-              prefix2 = match && match[1] || "";
+              prefix = match && match[1] || "";
             }
           return `
-` + prefix2 + name;
+` + prefix + name;
         }
       }
       var reentry = !1, componentFrameCache;
@@ -6718,7 +6718,7 @@ Error generating stack: ` + x.message + `
             return "DehydratedFragment";
           case ForwardRef:
             return getWrappedName$1(type, type.render, "ForwardRef");
-          case Fragment6:
+          case Fragment4:
             return "Fragment";
           case HostComponent:
             return type;
@@ -7226,13 +7226,13 @@ Check the render method of \`` + ownerName + "`." : "";
         strokeOpacity: !0,
         strokeWidth: !0
       };
-      function prefixKey(prefix3, key) {
-        return prefix3 + key.charAt(0).toUpperCase() + key.substring(1);
+      function prefixKey(prefix2, key) {
+        return prefix2 + key.charAt(0).toUpperCase() + key.substring(1);
       }
       var prefixes = ["Webkit", "ms", "Moz", "O"];
       Object.keys(isUnitlessNumber).forEach(function(prop) {
-        prefixes.forEach(function(prefix3) {
-          isUnitlessNumber[prefixKey(prefix3, prop)] = isUnitlessNumber[prop];
+        prefixes.forEach(function(prefix2) {
+          isUnitlessNumber[prefixKey(prefix2, prop)] = isUnitlessNumber[prop];
         });
       });
       function dangerousStyleValue(name, value, isCustomProperty) {
@@ -12292,10 +12292,10 @@ Learn more about this warning here: https://reactjs.org/link/legacy-context`, so
       function propagateContextChange_eager(workInProgress2, context, renderLanes2) {
         var fiber = workInProgress2.child;
         for (fiber !== null && (fiber.return = workInProgress2); fiber !== null; ) {
-          var nextFiber = void 0, list2 = fiber.dependencies;
-          if (list2 !== null) {
+          var nextFiber = void 0, list = fiber.dependencies;
+          if (list !== null) {
             nextFiber = fiber.child;
-            for (var dependency = list2.firstContext; dependency !== null; ) {
+            for (var dependency = list.firstContext; dependency !== null; ) {
               if (dependency.context === context) {
                 if (fiber.tag === ClassComponent) {
                   var lane = pickArbitraryLane(renderLanes2), update = createUpdate(NoTimestamp, lane);
@@ -12308,7 +12308,7 @@ Learn more about this warning here: https://reactjs.org/link/legacy-context`, so
                 }
                 fiber.lanes = mergeLanes(fiber.lanes, renderLanes2);
                 var alternate = fiber.alternate;
-                alternate !== null && (alternate.lanes = mergeLanes(alternate.lanes, renderLanes2)), scheduleContextWorkOnParentPath(fiber.return, renderLanes2, workInProgress2), list2.lanes = mergeLanes(list2.lanes, renderLanes2);
+                alternate !== null && (alternate.lanes = mergeLanes(alternate.lanes, renderLanes2)), scheduleContextWorkOnParentPath(fiber.return, renderLanes2, workInProgress2), list.lanes = mergeLanes(list.lanes, renderLanes2);
                 break;
               }
               dependency = dependency.next;
@@ -13047,7 +13047,7 @@ See https://reactjs.org/link/refs-must-have-owner for more information.`);
           }
         }
         function updateFragment2(returnFiber, current2, fragment, lanes, key) {
-          if (current2 === null || current2.tag !== Fragment6) {
+          if (current2 === null || current2.tag !== Fragment4) {
             var created = createFiberFromFragment(fragment, returnFiber.mode, lanes, key);
             return created.return = returnFiber, created;
           } else {
@@ -13275,7 +13275,7 @@ See https://reactjs.org/link/refs-must-have-owner for more information.`);
             if (child.key === key) {
               var elementType = element.type;
               if (elementType === REACT_FRAGMENT_TYPE) {
-                if (child.tag === Fragment6) {
+                if (child.tag === Fragment4) {
                   deleteRemainingChildren(returnFiber, child.sibling);
                   var existing = useFiber(child, element.props.children);
                   return existing.return = returnFiber, existing._debugSource = element._source, existing._debugOwner = element._owner, existing;
@@ -15865,7 +15865,7 @@ Check the render method of \`` + ownerName + "`.");
             var type = workInProgress2.type, _unresolvedProps2 = workInProgress2.pendingProps, _resolvedProps2 = workInProgress2.elementType === type ? _unresolvedProps2 : resolveDefaultProps(type, _unresolvedProps2);
             return updateForwardRef(current2, workInProgress2, type, _resolvedProps2, renderLanes2);
           }
-          case Fragment6:
+          case Fragment4:
             return updateFragment(current2, workInProgress2, renderLanes2);
           case Mode:
             return updateMode(current2, workInProgress2, renderLanes2);
@@ -16017,7 +16017,7 @@ Check the render method of \`` + ownerName + "`.");
           case SimpleMemoComponent:
           case FunctionComponent:
           case ForwardRef:
-          case Fragment6:
+          case Fragment4:
           case Mode:
           case Profiler:
           case ContextConsumer:
@@ -18574,7 +18574,7 @@ Check the render method of \`` + ownerName + "`.");
         return fiber._debugSource = element._source, fiber._debugOwner = element._owner, fiber;
       }
       function createFiberFromFragment(elements, mode2, lanes, key) {
-        var fiber = createFiber(Fragment6, elements, key, mode2);
+        var fiber = createFiber(Fragment4, elements, key, mode2);
         return fiber.lanes = lanes, fiber;
       }
       function createFiberFromProfiler(pendingProps, mode2, lanes, key) {
@@ -19332,7 +19332,7 @@ function useLocation() {
 function useNavigationType() {
   return React.useContext(LocationContext).navigationType;
 }
-function useMatch(pattern2) {
+function useMatch(pattern) {
   useInRouterContext() || invariant(
     !1,
     // TODO: This error is probably because they somehow have 2 versions of the
@@ -19342,7 +19342,7 @@ function useMatch(pattern2) {
   let {
     pathname
   } = useLocation();
-  return React.useMemo(() => matchPath(pattern2, pathname), [pathname, pattern2]);
+  return React.useMemo(() => matchPath(pattern, pathname), [pathname, pattern]);
 }
 function useIsomorphicLayoutEffect(cb) {
   React.useContext(NavigationContext).static || React.useLayoutEffect(cb);
@@ -20225,8 +20225,8 @@ function getFormSubmissionInfo(target, basename) {
         value
       } = target;
       if (type === "image") {
-        let prefix2 = name ? name + "." : "";
-        formData.append(prefix2 + "x", "0"), formData.append(prefix2 + "y", "0");
+        let prefix = name ? name + "." : "";
+        formData.append(prefix + "x", "0"), formData.append(prefix + "y", "0");
       } else
         name && formData.append(name, value);
     }
@@ -21323,8 +21323,8 @@ var require_react_dom_server_legacy_browser_development = __commonJS({
               return !1;
             if (propertyInfo !== null)
               return !propertyInfo.acceptsBooleans;
-            var prefix3 = name.toLowerCase().slice(0, 5);
-            return prefix3 !== "data-" && prefix3 !== "aria-";
+            var prefix2 = name.toLowerCase().slice(0, 5);
+            return prefix2 !== "data-" && prefix2 !== "aria-";
           }
           default:
             return !1;
@@ -21752,13 +21752,13 @@ var require_react_dom_server_legacy_browser_development = __commonJS({
         strokeOpacity: !0,
         strokeWidth: !0
       };
-      function prefixKey(prefix3, key) {
-        return prefix3 + key.charAt(0).toUpperCase() + key.substring(1);
+      function prefixKey(prefix2, key) {
+        return prefix2 + key.charAt(0).toUpperCase() + key.substring(1);
       }
       var prefixes = ["Webkit", "ms", "Moz", "O"];
       Object.keys(isUnitlessNumber).forEach(function(prop) {
-        prefixes.forEach(function(prefix3) {
-          isUnitlessNumber[prefixKey(prefix3, prop)] = isUnitlessNumber[prop];
+        prefixes.forEach(function(prefix2) {
+          isUnitlessNumber[prefixKey(prefix2, prop)] = isUnitlessNumber[prop];
         });
       });
       var hasReadOnlyValue = {
@@ -22518,8 +22518,8 @@ var require_react_dom_server_legacy_browser_development = __commonJS({
       function escapeBootstrapScriptContent(scriptText) {
         return checkHtmlStringCoercion(scriptText), ("" + scriptText).replace(scriptRegex, scriptReplacer);
       }
-      var scriptRegex = /(<\/|<)(s)(cript)/gi, scriptReplacer = function(match, prefix3, s, suffix) {
-        return "" + prefix3 + (s === "s" ? "\\u0073" : "\\u0053") + suffix;
+      var scriptRegex = /(<\/|<)(s)(cript)/gi, scriptReplacer = function(match, prefix2, s, suffix) {
+        return "" + prefix2 + (s === "s" ? "\\u0073" : "\\u0053") + suffix;
       };
       function createResponseState(identifierPrefix, nonce, bootstrapScriptContent, bootstrapScripts, bootstrapModules) {
         var idPrefix = identifierPrefix === void 0 ? "" : identifierPrefix, inlineScriptWithNonce = nonce === void 0 ? startInlineScript : '<script nonce="' + escapeTextForBrowser(nonce) + '">', bootstrapChunks = [];
@@ -22666,8 +22666,8 @@ var require_react_dom_server_legacy_browser_development = __commonJS({
               case "symbol":
                 return;
               case "boolean": {
-                var prefix3 = name.toLowerCase().slice(0, 5);
-                if (prefix3 !== "data-" && prefix3 !== "aria-")
+                var prefix2 = name.toLowerCase().slice(0, 5);
+                if (prefix2 !== "data-" && prefix2 !== "aria-")
                   return;
               }
             }
@@ -23346,18 +23346,18 @@ var require_react_dom_server_legacy_browser_development = __commonJS({
           disabledDepth < 0 && error("disabledDepth fell below zero. This is a bug in React. Please file an issue.");
         }
       }
-      var ReactCurrentDispatcher = ReactSharedInternals.ReactCurrentDispatcher, prefix2;
+      var ReactCurrentDispatcher = ReactSharedInternals.ReactCurrentDispatcher, prefix;
       function describeBuiltInComponentFrame(name, source, ownerFn) {
         {
-          if (prefix2 === void 0)
+          if (prefix === void 0)
             try {
               throw Error();
             } catch (x) {
               var match = x.stack.trim().match(/\n( *(at )?)/);
-              prefix2 = match && match[1] || "";
+              prefix = match && match[1] || "";
             }
           return `
-` + prefix2 + name;
+` + prefix + name;
         }
       }
       var reentry = !1, componentFrameCache;
@@ -24915,8 +24915,8 @@ var require_react_dom_server_browser_development = __commonJS({
               return !1;
             if (propertyInfo !== null)
               return !propertyInfo.acceptsBooleans;
-            var prefix3 = name.toLowerCase().slice(0, 5);
-            return prefix3 !== "data-" && prefix3 !== "aria-";
+            var prefix2 = name.toLowerCase().slice(0, 5);
+            return prefix2 !== "data-" && prefix2 !== "aria-";
           }
           default:
             return !1;
@@ -25344,13 +25344,13 @@ var require_react_dom_server_browser_development = __commonJS({
         strokeOpacity: !0,
         strokeWidth: !0
       };
-      function prefixKey(prefix3, key) {
-        return prefix3 + key.charAt(0).toUpperCase() + key.substring(1);
+      function prefixKey(prefix2, key) {
+        return prefix2 + key.charAt(0).toUpperCase() + key.substring(1);
       }
       var prefixes = ["Webkit", "ms", "Moz", "O"];
       Object.keys(isUnitlessNumber).forEach(function(prop) {
-        prefixes.forEach(function(prefix3) {
-          isUnitlessNumber[prefixKey(prefix3, prop)] = isUnitlessNumber[prop];
+        prefixes.forEach(function(prefix2) {
+          isUnitlessNumber[prefixKey(prefix2, prop)] = isUnitlessNumber[prop];
         });
       });
       var hasReadOnlyValue = {
@@ -26110,8 +26110,8 @@ var require_react_dom_server_browser_development = __commonJS({
       function escapeBootstrapScriptContent(scriptText) {
         return checkHtmlStringCoercion(scriptText), ("" + scriptText).replace(scriptRegex, scriptReplacer);
       }
-      var scriptRegex = /(<\/|<)(s)(cript)/gi, scriptReplacer = function(match, prefix3, s, suffix) {
-        return "" + prefix3 + (s === "s" ? "\\u0073" : "\\u0053") + suffix;
+      var scriptRegex = /(<\/|<)(s)(cript)/gi, scriptReplacer = function(match, prefix2, s, suffix) {
+        return "" + prefix2 + (s === "s" ? "\\u0073" : "\\u0053") + suffix;
       };
       function createResponseState(identifierPrefix, nonce, bootstrapScriptContent, bootstrapScripts, bootstrapModules) {
         var idPrefix = identifierPrefix === void 0 ? "" : identifierPrefix, inlineScriptWithNonce = nonce === void 0 ? startInlineScript : stringToPrecomputedChunk('<script nonce="' + escapeTextForBrowser(nonce) + '">'), bootstrapChunks = [];
@@ -26262,8 +26262,8 @@ var require_react_dom_server_browser_development = __commonJS({
               case "symbol":
                 return;
               case "boolean": {
-                var prefix3 = name.toLowerCase().slice(0, 5);
-                if (prefix3 !== "data-" && prefix3 !== "aria-")
+                var prefix2 = name.toLowerCase().slice(0, 5);
+                if (prefix2 !== "data-" && prefix2 !== "aria-")
                   return;
               }
             }
@@ -26898,18 +26898,18 @@ var require_react_dom_server_browser_development = __commonJS({
           disabledDepth < 0 && error("disabledDepth fell below zero. This is a bug in React. Please file an issue.");
         }
       }
-      var ReactCurrentDispatcher = ReactSharedInternals.ReactCurrentDispatcher, prefix2;
+      var ReactCurrentDispatcher = ReactSharedInternals.ReactCurrentDispatcher, prefix;
       function describeBuiltInComponentFrame(name, source, ownerFn) {
         {
-          if (prefix2 === void 0)
+          if (prefix === void 0)
             try {
               throw Error();
             } catch (x) {
               var match = x.stack.trim().match(/\n( *(at )?)/);
-              prefix2 = match && match[1] || "";
+              prefix = match && match[1] || "";
             }
           return `
-` + prefix2 + name;
+` + prefix + name;
         }
       }
       var reentry = !1, componentFrameCache;
@@ -28533,18 +28533,18 @@ var require_react_jsx_dev_runtime_development = __commonJS({
           disabledDepth < 0 && error("disabledDepth fell below zero. This is a bug in React. Please file an issue.");
         }
       }
-      var ReactCurrentDispatcher = ReactSharedInternals.ReactCurrentDispatcher, prefix2;
+      var ReactCurrentDispatcher = ReactSharedInternals.ReactCurrentDispatcher, prefix;
       function describeBuiltInComponentFrame(name, source, ownerFn) {
         {
-          if (prefix2 === void 0)
+          if (prefix === void 0)
             try {
               throw Error();
             } catch (x) {
               var match = x.stack.trim().match(/\n( *(at )?)/);
-              prefix2 = match && match[1] || "";
+              prefix = match && match[1] || "";
             }
           return `
-` + prefix2 + name;
+` + prefix + name;
         }
       }
       var reentry = !1, componentFrameCache;
@@ -28970,509 +28970,8 @@ var require_jsx_dev_runtime = __commonJS({
   }
 });
 
-// node_modules/remove-accents/index.js
-var require_remove_accents = __commonJS({
-  "node_modules/remove-accents/index.js"(exports, module) {
-    var characterMap = {
-      \u00C0: "A",
-      \u00C1: "A",
-      \u00C2: "A",
-      \u00C3: "A",
-      \u00C4: "A",
-      \u00C5: "A",
-      \u1EA4: "A",
-      \u1EAE: "A",
-      \u1EB2: "A",
-      \u1EB4: "A",
-      \u1EB6: "A",
-      \u00C6: "AE",
-      \u1EA6: "A",
-      \u1EB0: "A",
-      \u0202: "A",
-      \u1EA2: "A",
-      \u1EA0: "A",
-      \u1EA8: "A",
-      \u1EAA: "A",
-      \u1EAC: "A",
-      \u00C7: "C",
-      \u1E08: "C",
-      \u00C8: "E",
-      \u00C9: "E",
-      \u00CA: "E",
-      \u00CB: "E",
-      \u1EBE: "E",
-      \u1E16: "E",
-      \u1EC0: "E",
-      \u1E14: "E",
-      \u1E1C: "E",
-      \u0206: "E",
-      \u1EBA: "E",
-      \u1EBC: "E",
-      \u1EB8: "E",
-      \u1EC2: "E",
-      \u1EC4: "E",
-      \u1EC6: "E",
-      \u00CC: "I",
-      \u00CD: "I",
-      \u00CE: "I",
-      \u00CF: "I",
-      \u1E2E: "I",
-      \u020A: "I",
-      \u1EC8: "I",
-      \u1ECA: "I",
-      \u00D0: "D",
-      \u00D1: "N",
-      \u00D2: "O",
-      \u00D3: "O",
-      \u00D4: "O",
-      \u00D5: "O",
-      \u00D6: "O",
-      \u00D8: "O",
-      \u1ED0: "O",
-      \u1E4C: "O",
-      \u1E52: "O",
-      \u020E: "O",
-      \u1ECE: "O",
-      \u1ECC: "O",
-      \u1ED4: "O",
-      \u1ED6: "O",
-      \u1ED8: "O",
-      \u1EDC: "O",
-      \u1EDE: "O",
-      \u1EE0: "O",
-      \u1EDA: "O",
-      \u1EE2: "O",
-      \u00D9: "U",
-      \u00DA: "U",
-      \u00DB: "U",
-      \u00DC: "U",
-      \u1EE6: "U",
-      \u1EE4: "U",
-      \u1EEC: "U",
-      \u1EEE: "U",
-      \u1EF0: "U",
-      \u00DD: "Y",
-      \u00E0: "a",
-      \u00E1: "a",
-      \u00E2: "a",
-      \u00E3: "a",
-      \u00E4: "a",
-      \u00E5: "a",
-      \u1EA5: "a",
-      \u1EAF: "a",
-      \u1EB3: "a",
-      \u1EB5: "a",
-      \u1EB7: "a",
-      \u00E6: "ae",
-      \u1EA7: "a",
-      \u1EB1: "a",
-      \u0203: "a",
-      \u1EA3: "a",
-      \u1EA1: "a",
-      \u1EA9: "a",
-      \u1EAB: "a",
-      \u1EAD: "a",
-      \u00E7: "c",
-      \u1E09: "c",
-      \u00E8: "e",
-      \u00E9: "e",
-      \u00EA: "e",
-      \u00EB: "e",
-      \u1EBF: "e",
-      \u1E17: "e",
-      \u1EC1: "e",
-      \u1E15: "e",
-      \u1E1D: "e",
-      \u0207: "e",
-      \u1EBB: "e",
-      \u1EBD: "e",
-      \u1EB9: "e",
-      \u1EC3: "e",
-      \u1EC5: "e",
-      \u1EC7: "e",
-      \u00EC: "i",
-      \u00ED: "i",
-      \u00EE: "i",
-      \u00EF: "i",
-      \u1E2F: "i",
-      \u020B: "i",
-      \u1EC9: "i",
-      \u1ECB: "i",
-      \u00F0: "d",
-      \u00F1: "n",
-      \u00F2: "o",
-      \u00F3: "o",
-      \u00F4: "o",
-      \u00F5: "o",
-      \u00F6: "o",
-      \u00F8: "o",
-      \u1ED1: "o",
-      \u1E4D: "o",
-      \u1E53: "o",
-      \u020F: "o",
-      \u1ECF: "o",
-      \u1ECD: "o",
-      \u1ED5: "o",
-      \u1ED7: "o",
-      \u1ED9: "o",
-      \u1EDD: "o",
-      \u1EDF: "o",
-      \u1EE1: "o",
-      \u1EDB: "o",
-      \u1EE3: "o",
-      \u00F9: "u",
-      \u00FA: "u",
-      \u00FB: "u",
-      \u00FC: "u",
-      \u1EE7: "u",
-      \u1EE5: "u",
-      \u1EED: "u",
-      \u1EEF: "u",
-      \u1EF1: "u",
-      \u00FD: "y",
-      \u00FF: "y",
-      \u0100: "A",
-      \u0101: "a",
-      \u0102: "A",
-      \u0103: "a",
-      \u0104: "A",
-      \u0105: "a",
-      \u0106: "C",
-      \u0107: "c",
-      \u0108: "C",
-      \u0109: "c",
-      \u010A: "C",
-      \u010B: "c",
-      \u010C: "C",
-      \u010D: "c",
-      C\u0306: "C",
-      c\u0306: "c",
-      \u010E: "D",
-      \u010F: "d",
-      \u0110: "D",
-      \u0111: "d",
-      \u0112: "E",
-      \u0113: "e",
-      \u0114: "E",
-      \u0115: "e",
-      \u0116: "E",
-      \u0117: "e",
-      \u0118: "E",
-      \u0119: "e",
-      \u011A: "E",
-      \u011B: "e",
-      \u011C: "G",
-      \u01F4: "G",
-      \u011D: "g",
-      \u01F5: "g",
-      \u011E: "G",
-      \u011F: "g",
-      \u0120: "G",
-      \u0121: "g",
-      \u0122: "G",
-      \u0123: "g",
-      \u0124: "H",
-      \u0125: "h",
-      \u0126: "H",
-      \u0127: "h",
-      \u1E2A: "H",
-      \u1E2B: "h",
-      \u0128: "I",
-      \u0129: "i",
-      \u012A: "I",
-      \u012B: "i",
-      \u012C: "I",
-      \u012D: "i",
-      \u012E: "I",
-      \u012F: "i",
-      \u0130: "I",
-      \u0131: "i",
-      \u0132: "IJ",
-      \u0133: "ij",
-      \u0134: "J",
-      \u0135: "j",
-      \u0136: "K",
-      \u0137: "k",
-      \u1E30: "K",
-      \u1E31: "k",
-      K\u0306: "K",
-      k\u0306: "k",
-      \u0139: "L",
-      \u013A: "l",
-      \u013B: "L",
-      \u013C: "l",
-      \u013D: "L",
-      \u013E: "l",
-      \u013F: "L",
-      \u0140: "l",
-      \u0141: "l",
-      \u0142: "l",
-      \u1E3E: "M",
-      \u1E3F: "m",
-      M\u0306: "M",
-      m\u0306: "m",
-      \u0143: "N",
-      \u0144: "n",
-      \u0145: "N",
-      \u0146: "n",
-      \u0147: "N",
-      \u0148: "n",
-      \u0149: "n",
-      N\u0306: "N",
-      n\u0306: "n",
-      \u014C: "O",
-      \u014D: "o",
-      \u014E: "O",
-      \u014F: "o",
-      \u0150: "O",
-      \u0151: "o",
-      \u0152: "OE",
-      \u0153: "oe",
-      P\u0306: "P",
-      p\u0306: "p",
-      \u0154: "R",
-      \u0155: "r",
-      \u0156: "R",
-      \u0157: "r",
-      \u0158: "R",
-      \u0159: "r",
-      R\u0306: "R",
-      r\u0306: "r",
-      \u0212: "R",
-      \u0213: "r",
-      \u015A: "S",
-      \u015B: "s",
-      \u015C: "S",
-      \u015D: "s",
-      \u015E: "S",
-      \u0218: "S",
-      \u0219: "s",
-      \u015F: "s",
-      \u0160: "S",
-      \u0161: "s",
-      \u0162: "T",
-      \u0163: "t",
-      \u021B: "t",
-      \u021A: "T",
-      \u0164: "T",
-      \u0165: "t",
-      \u0166: "T",
-      \u0167: "t",
-      T\u0306: "T",
-      t\u0306: "t",
-      \u0168: "U",
-      \u0169: "u",
-      \u016A: "U",
-      \u016B: "u",
-      \u016C: "U",
-      \u016D: "u",
-      \u016E: "U",
-      \u016F: "u",
-      \u0170: "U",
-      \u0171: "u",
-      \u0172: "U",
-      \u0173: "u",
-      \u0216: "U",
-      \u0217: "u",
-      V\u0306: "V",
-      v\u0306: "v",
-      \u0174: "W",
-      \u0175: "w",
-      \u1E82: "W",
-      \u1E83: "w",
-      X\u0306: "X",
-      x\u0306: "x",
-      \u0176: "Y",
-      \u0177: "y",
-      \u0178: "Y",
-      Y\u0306: "Y",
-      y\u0306: "y",
-      \u0179: "Z",
-      \u017A: "z",
-      \u017B: "Z",
-      \u017C: "z",
-      \u017D: "Z",
-      \u017E: "z",
-      \u017F: "s",
-      \u0192: "f",
-      \u01A0: "O",
-      \u01A1: "o",
-      \u01AF: "U",
-      \u01B0: "u",
-      \u01CD: "A",
-      \u01CE: "a",
-      \u01CF: "I",
-      \u01D0: "i",
-      \u01D1: "O",
-      \u01D2: "o",
-      \u01D3: "U",
-      \u01D4: "u",
-      \u01D5: "U",
-      \u01D6: "u",
-      \u01D7: "U",
-      \u01D8: "u",
-      \u01D9: "U",
-      \u01DA: "u",
-      \u01DB: "U",
-      \u01DC: "u",
-      \u1EE8: "U",
-      \u1EE9: "u",
-      \u1E78: "U",
-      \u1E79: "u",
-      \u01FA: "A",
-      \u01FB: "a",
-      \u01FC: "AE",
-      \u01FD: "ae",
-      \u01FE: "O",
-      \u01FF: "o",
-      \u00DE: "TH",
-      \u00FE: "th",
-      \u1E54: "P",
-      \u1E55: "p",
-      \u1E64: "S",
-      \u1E65: "s",
-      X\u0301: "X",
-      x\u0301: "x",
-      \u0403: "\u0413",
-      \u0453: "\u0433",
-      \u040C: "\u041A",
-      \u045C: "\u043A",
-      A\u030B: "A",
-      a\u030B: "a",
-      E\u030B: "E",
-      e\u030B: "e",
-      I\u030B: "I",
-      i\u030B: "i",
-      \u01F8: "N",
-      \u01F9: "n",
-      \u1ED2: "O",
-      \u1ED3: "o",
-      \u1E50: "O",
-      \u1E51: "o",
-      \u1EEA: "U",
-      \u1EEB: "u",
-      \u1E80: "W",
-      \u1E81: "w",
-      \u1EF2: "Y",
-      \u1EF3: "y",
-      \u0200: "A",
-      \u0201: "a",
-      \u0204: "E",
-      \u0205: "e",
-      \u0208: "I",
-      \u0209: "i",
-      \u020C: "O",
-      \u020D: "o",
-      \u0210: "R",
-      \u0211: "r",
-      \u0214: "U",
-      \u0215: "u",
-      B\u030C: "B",
-      b\u030C: "b",
-      \u010C\u0323: "C",
-      \u010D\u0323: "c",
-      \u00CA\u030C: "E",
-      \u00EA\u030C: "e",
-      F\u030C: "F",
-      f\u030C: "f",
-      \u01E6: "G",
-      \u01E7: "g",
-      \u021E: "H",
-      \u021F: "h",
-      J\u030C: "J",
-      \u01F0: "j",
-      \u01E8: "K",
-      \u01E9: "k",
-      M\u030C: "M",
-      m\u030C: "m",
-      P\u030C: "P",
-      p\u030C: "p",
-      Q\u030C: "Q",
-      q\u030C: "q",
-      \u0158\u0329: "R",
-      \u0159\u0329: "r",
-      \u1E66: "S",
-      \u1E67: "s",
-      V\u030C: "V",
-      v\u030C: "v",
-      W\u030C: "W",
-      w\u030C: "w",
-      X\u030C: "X",
-      x\u030C: "x",
-      Y\u030C: "Y",
-      y\u030C: "y",
-      A\u0327: "A",
-      a\u0327: "a",
-      B\u0327: "B",
-      b\u0327: "b",
-      \u1E10: "D",
-      \u1E11: "d",
-      \u0228: "E",
-      \u0229: "e",
-      \u0190\u0327: "E",
-      \u025B\u0327: "e",
-      \u1E28: "H",
-      \u1E29: "h",
-      I\u0327: "I",
-      i\u0327: "i",
-      \u0197\u0327: "I",
-      \u0268\u0327: "i",
-      M\u0327: "M",
-      m\u0327: "m",
-      O\u0327: "O",
-      o\u0327: "o",
-      Q\u0327: "Q",
-      q\u0327: "q",
-      U\u0327: "U",
-      u\u0327: "u",
-      X\u0327: "X",
-      x\u0327: "x",
-      Z\u0327: "Z",
-      z\u0327: "z",
-      \u0439: "\u0438",
-      \u0419: "\u0418",
-      \u0451: "\u0435",
-      \u0401: "\u0415"
-    }, chars = Object.keys(characterMap).join("|"), allAccents = new RegExp(chars, "g"), firstAccent = new RegExp(chars, "");
-    function matcher(match) {
-      return characterMap[match];
-    }
-    var removeAccents2 = function(string) {
-      return string.replace(allAccents, matcher);
-    }, hasAccents = function(string) {
-      return !!string.match(firstAccent);
-    };
-    module.exports = removeAccents2;
-    module.exports.has = hasAccents;
-    module.exports.remove = removeAccents2;
-  }
-});
-
-// node_modules/sort-by/index.js
-var require_sort_by = __commonJS({
-  "node_modules/sort-by/index.js"(exports, module) {
-    var sortBy2, sort;
-    sort = function(property) {
-      var sortOrder = 1, fn;
-      return property[0] === "-" && (sortOrder = -1, property = property.substr(1)), fn = function(a, b) {
-        var result = a[property] < b[property] ? -1 : a[property] > b[property] ? 1 : 0;
-        return result * sortOrder;
-      }, fn;
-    };
-    sortBy2 = function() {
-      var props = arguments, fn;
-      return fn = function(obj1, obj2) {
-        for (var numberOfProperties = props.length, result = 0, i = 0; result === 0 && i < numberOfProperties; )
-          result = sort(props[i])(obj1, obj2), i++;
-        return result;
-      }, fn;
-    };
-    module.exports = sortBy2;
-  }
-});
-
 // server.ts
-var import_cloudflare4 = __toESM(require_dist(), 1);
+var import_cloudflare2 = __toESM(require_dist(), 1);
 
 // node_modules/@remix-run/cloudflare-pages/dist/esm/worker.js
 var import_cloudflare = __toESM(require_dist());
@@ -29530,9 +29029,9 @@ __export(server_build_exports, {
   routes: () => routes
 });
 
-// node_modules/@remix-run/dev/dist/config/defaults/entry.server.cloudflare.tsx
-var entry_server_cloudflare_exports = {};
-__export(entry_server_cloudflare_exports, {
+// app/entry.server.tsx
+var entry_server_exports = {};
+__export(entry_server_exports, {
   default: () => handleRequest
 });
 
@@ -29907,7 +29406,7 @@ function Meta() {
     loaderData
   } = useDataRouterStateContext(), location = useLocation(), _matches = getActiveMatches(routerMatches, errors, isSpaMode), error = null;
   errors && (error = errors[_matches[_matches.length - 1].route.id]);
-  let meta = [], leafMeta = null, matches = [];
+  let meta2 = [], leafMeta = null, matches = [];
   for (let i = 0; i < _matches.length; i++) {
     let _match = _matches[i], routeId = _match.route.id, data = loaderData[routeId], params = _match.params, routeModule = routeModules[routeId], routeMeta = [], match = {
       id: routeId,
@@ -29928,9 +29427,9 @@ function Meta() {
       throw new Error("The route at " + _match.route.path + ` returns an invalid value. All route meta functions must return an array of meta objects.
 
 To reference the meta function API, see https://remix.run/route/meta`);
-    match.meta = routeMeta, matches[i] = match, meta = [...routeMeta], leafMeta = meta;
+    match.meta = routeMeta, matches[i] = match, meta2 = [...routeMeta], leafMeta = meta2;
   }
-  return /* @__PURE__ */ React3.createElement(React3.Fragment, null, meta.flat().map((metaProps) => {
+  return /* @__PURE__ */ React3.createElement(React3.Fragment, null, meta2.flat().map((metaProps) => {
     if (!metaProps)
       return null;
     if ("tagName" in metaProps) {
@@ -29953,12 +29452,12 @@ To reference the meta function API, see https://remix.run/route/meta`);
       }) : null;
     if ("script:ld+json" in metaProps)
       try {
-        let json6 = JSON.stringify(metaProps["script:ld+json"]);
+        let json4 = JSON.stringify(metaProps["script:ld+json"]);
         return /* @__PURE__ */ React3.createElement("script", {
-          key: `script:ld+json:${json6}`,
+          key: `script:ld+json:${json4}`,
           type: "application/ld+json",
           dangerouslySetInnerHTML: {
-            __html: json6
+            __html: json4
           }
         });
       } catch {
@@ -30152,9 +29651,6 @@ function ErrorDeferredHydrationScript({
 }
 function dedupe(array) {
   return [...new Set(array)];
-}
-function useLoaderData2() {
-  return useLoaderData();
 }
 var LiveReload = function({
   origin = "http://localhost:3001/",
@@ -30533,196 +30029,9 @@ function RemixServer({
 }
 
 // node_modules/isbot/index.mjs
-var isbot_exports = {};
-__export(isbot_exports, {
-  createIsbot: () => createIsbot,
-  createIsbotFromList: () => createIsbotFromList,
-  isbot: () => isbot,
-  isbotMatch: () => isbotMatch,
-  isbotMatches: () => isbotMatches,
-  isbotNaive: () => isbotNaive,
-  isbotPattern: () => isbotPattern,
-  isbotPatterns: () => isbotPatterns,
-  list: () => list,
-  pattern: () => pattern
-});
-var fullPattern = " daum[ /]| deusu/| yadirectfetcher|(?:^| )site|(?:^|[^g])news|(?<! (?:channel/|google/))google(?!(app|/google| pixel))|(?<! cu)bot(?:[^\\w]|_|$)|(?<! ya(?:yandex)?)search|(?<!(?:lib))http|(?<![hg]m)score|@[a-z]|\\(at\\)[a-z]|\\[at\\][a-z]|^12345|^<|^[\\w \\.\\-\\(?:\\):]+(?:/v?\\d+(\\.\\d+)?(?:\\.\\d{1,10})?)?(?:,|$)|^[^ ]{50,}$|^active|^ad muncher|^amaya|^anglesharp/|^avsdevicesdk/|^bidtellect/|^biglotron|^bot|^btwebclient/|^clamav[ /]|^client/|^cobweb/|^coccoc|^custom|^ddg[_-]android|^discourse|^dispatch/\\d|^downcast/|^duckduckgo|^facebook|^fdm[ /]\\d|^getright/|^gozilla/|^hatena|^hobbit|^hotzonu|^hwcdn/|^jeode/|^jetty/|^jigsaw|^linkdex|^metauri|^microsoft bits|^movabletype|^mozilla/\\d\\.\\d \\(compatible;?\\)$|^mozilla/\\d\\.\\d \\w*$|^navermailapp|^netsurf|^nuclei|^offline explorer|^php|^postman|^postrank|^python|^rank|^read|^reed|^rest|^serf|^snapchat|^space bison|^svn|^swcd |^taringa|^thumbor/|^tumblr/|^user-agent:|^valid|^venus/fedoraplanet|^w3c|^webbandit/|^webcopier|^wget|^whatsapp|^xenu link sleuth|^yahoo|^yandex|^zdm/\\d|^zoom marketplace/|^{{.*}}$|adbeat\\.com|appinsights|archive|ask jeeves/teoma|bit\\.ly/|bluecoat drtr|browsex|burpcollaborator|capture|catch|check|chrome-lighthouse|chromeframe|classifier|cloud|crawl|cryptoapi|dareboost|datanyze|dataprovider|dejaclick|dmbrowser|download|evc-batch/|feed|firephp|freesafeip|gomezagent|headless|httrack|hubspot marketing grader|hydra|ibisbrowser|images|inspect|iplabel|ips-agent|java(?!;)|library|mail\\.ru/|manager|monitor|neustar wpm|nutch|offbyone|optimize|pageburst|parser|perl|phantom|pingdom|powermarks|preview|proxy|ptst[ /]\\d|reader|reputation|resolver|retriever|rexx;|rigor|robot|rss|scan|scrape|server|sogou|sparkler/|speedcurve|spider|splash|statuscake|stumbleupon\\.com|supercleaner|synapse|synthetic|torrent|trace|transcoder|twingly recon|url|virtuoso|wappalyzer|webglance|webkit2png|whatcms/|wordpress|zgrab", regularExpression = / daum[ /]| deusu\/| yadirectfetcher|(?:^| )site|(?:^|[^g])news|(?<! (?:channel\/|google\/))google(?!(app|\/google| pixel))|(?<! cu)bot(?:[^\w]|_|$)|(?<! ya(?:yandex)?)search|(?<!(?:lib))http|(?<![hg]m)score|@[a-z]|\(at\)[a-z]|\[at\][a-z]|^12345|^<|^[\w \.\-\(?:\):]+(?:\/v?\d+(\.\d+)?(?:\.\d{1,10})?)?(?:,|$)|^[^ ]{50,}$|^active|^ad muncher|^amaya|^anglesharp\/|^avsdevicesdk\/|^bidtellect\/|^biglotron|^bot|^btwebclient\/|^clamav[ /]|^client\/|^cobweb\/|^coccoc|^custom|^ddg[_-]android|^discourse|^dispatch\/\d|^downcast\/|^duckduckgo|^facebook|^fdm[ /]\d|^getright\/|^gozilla\/|^hatena|^hobbit|^hotzonu|^hwcdn\/|^jeode\/|^jetty\/|^jigsaw|^linkdex|^metauri|^microsoft bits|^movabletype|^mozilla\/\d\.\d \(compatible;?\)$|^mozilla\/\d\.\d \w*$|^navermailapp|^netsurf|^nuclei|^offline explorer|^php|^postman|^postrank|^python|^rank|^read|^reed|^rest|^serf|^snapchat|^space bison|^svn|^swcd |^taringa|^thumbor\/|^tumblr\/|^user-agent:|^valid|^venus\/fedoraplanet|^w3c|^webbandit\/|^webcopier|^wget|^whatsapp|^xenu link sleuth|^yahoo|^yandex|^zdm\/\d|^zoom marketplace\/|^{{.*}}$|adbeat\.com|appinsights|archive|ask jeeves\/teoma|bit\.ly\/|bluecoat drtr|browsex|burpcollaborator|capture|catch|check|chrome-lighthouse|chromeframe|classifier|cloud|crawl|cryptoapi|dareboost|datanyze|dataprovider|dejaclick|dmbrowser|download|evc-batch\/|feed|firephp|freesafeip|gomezagent|headless|httrack|hubspot marketing grader|hydra|ibisbrowser|images|inspect|iplabel|ips-agent|java(?!;)|library|mail\.ru\/|manager|monitor|neustar wpm|nutch|offbyone|optimize|pageburst|parser|perl|phantom|pingdom|powermarks|preview|proxy|ptst[ /]\d|reader|reputation|resolver|retriever|rexx;|rigor|robot|rss|scan|scrape|server|sogou|sparkler\/|speedcurve|spider|splash|statuscake|stumbleupon\.com|supercleaner|synapse|synthetic|torrent|trace|transcoder|twingly recon|url|virtuoso|wappalyzer|webglance|webkit2png|whatcms\/|wordpress|zgrab/i, patterns_default = [
-  " daum[ /]",
-  " deusu/",
-  " yadirectfetcher",
-  "(?:^| )site",
-  "(?:^|[^g])news",
-  "(?<! (?:channel/|google/))google(?!(app|/google| pixel))",
-  "(?<! cu)bot(?:[^\\w]|_|$)",
-  "(?<! ya(?:yandex)?)search",
-  "(?<!(?:lib))http",
-  "(?<![hg]m)score",
-  "@[a-z]",
-  "\\(at\\)[a-z]",
-  "\\[at\\][a-z]",
-  "^12345",
-  "^<",
-  "^[\\w \\.\\-\\(?:\\):]+(?:/v?\\d+(\\.\\d+)?(?:\\.\\d{1,10})?)?(?:,|$)",
-  "^[^ ]{50,}$",
-  "^active",
-  "^ad muncher",
-  "^amaya",
-  "^anglesharp/",
-  "^avsdevicesdk/",
-  "^bidtellect/",
-  "^biglotron",
-  "^bot",
-  "^btwebclient/",
-  "^clamav[ /]",
-  "^client/",
-  "^cobweb/",
-  "^coccoc",
-  "^custom",
-  "^ddg[_-]android",
-  "^discourse",
-  "^dispatch/\\d",
-  "^downcast/",
-  "^duckduckgo",
-  "^facebook",
-  "^fdm[ /]\\d",
-  "^getright/",
-  "^gozilla/",
-  "^hatena",
-  "^hobbit",
-  "^hotzonu",
-  "^hwcdn/",
-  "^jeode/",
-  "^jetty/",
-  "^jigsaw",
-  "^linkdex",
-  "^metauri",
-  "^microsoft bits",
-  "^movabletype",
-  "^mozilla/\\d\\.\\d \\(compatible;?\\)$",
-  "^mozilla/\\d\\.\\d \\w*$",
-  "^navermailapp",
-  "^netsurf",
-  "^nuclei",
-  "^offline explorer",
-  "^php",
-  "^postman",
-  "^postrank",
-  "^python",
-  "^rank",
-  "^read",
-  "^reed",
-  "^rest",
-  "^serf",
-  "^snapchat",
-  "^space bison",
-  "^svn",
-  "^swcd ",
-  "^taringa",
-  "^thumbor/",
-  "^tumblr/",
-  "^user-agent:",
-  "^valid",
-  "^venus/fedoraplanet",
-  "^w3c",
-  "^webbandit/",
-  "^webcopier",
-  "^wget",
-  "^whatsapp",
-  "^xenu link sleuth",
-  "^yahoo",
-  "^yandex",
-  "^zdm/\\d",
-  "^zoom marketplace/",
-  "^{{.*}}$",
-  "adbeat\\.com",
-  "appinsights",
-  "archive",
-  "ask jeeves/teoma",
-  "bit\\.ly/",
-  "bluecoat drtr",
-  "browsex",
-  "burpcollaborator",
-  "capture",
-  "catch",
-  "check",
-  "chrome-lighthouse",
-  "chromeframe",
-  "classifier",
-  "cloud",
-  "crawl",
-  "cryptoapi",
-  "dareboost",
-  "datanyze",
-  "dataprovider",
-  "dejaclick",
-  "dmbrowser",
-  "download",
-  "evc-batch/",
-  "feed",
-  "firephp",
-  "freesafeip",
-  "gomezagent",
-  "headless",
-  "httrack",
-  "hubspot marketing grader",
-  "hydra",
-  "ibisbrowser",
-  "images",
-  "inspect",
-  "iplabel",
-  "ips-agent",
-  "java(?!;)",
-  "library",
-  "mail\\.ru/",
-  "manager",
-  "monitor",
-  "neustar wpm",
-  "nutch",
-  "offbyone",
-  "optimize",
-  "pageburst",
-  "parser",
-  "perl",
-  "phantom",
-  "pingdom",
-  "powermarks",
-  "preview",
-  "proxy",
-  "ptst[ /]\\d",
-  "reader",
-  "reputation",
-  "resolver",
-  "retriever",
-  "rexx;",
-  "rigor",
-  "robot",
-  "rss",
-  "scan",
-  "scrape",
-  "server",
-  "sogou",
-  "sparkler/",
-  "speedcurve",
-  "spider",
-  "splash",
-  "statuscake",
-  "stumbleupon\\.com",
-  "supercleaner",
-  "synapse",
-  "synthetic",
-  "torrent",
-  "trace",
-  "transcoder",
-  "twingly recon",
-  "url",
-  "virtuoso",
-  "wappalyzer",
-  "webglance",
-  "webkit2png",
-  "whatcms/",
-  "wordpress",
-  "zgrab"
-], naivePattern = /bot|spider|crawl|http|lighthouse/i, pattern = regularExpression, list = patterns_default, isbotNaive = (userAgent) => Boolean(userAgent) && naivePattern.test(userAgent), usedPattern;
+var fullPattern = " daum[ /]| deusu/| yadirectfetcher|(?:^| )site|(?:^|[^g])news|(?<! (?:channel/|google/))google(?!(app|/google| pixel))|(?<! cu)bot(?:[^\\w]|_|$)|(?<! ya(?:yandex)?)search|(?<!(?:lib))http|(?<![hg]m)score|@[a-z]|\\(at\\)[a-z]|\\[at\\][a-z]|^12345|^<|^[\\w \\.\\-\\(?:\\):]+(?:/v?\\d+(\\.\\d+)?(?:\\.\\d{1,10})?)?(?:,|$)|^[^ ]{50,}$|^active|^ad muncher|^amaya|^anglesharp/|^avsdevicesdk/|^bidtellect/|^biglotron|^bot|^btwebclient/|^clamav[ /]|^client/|^cobweb/|^coccoc|^custom|^ddg[_-]android|^discourse|^dispatch/\\d|^downcast/|^duckduckgo|^facebook|^fdm[ /]\\d|^getright/|^gozilla/|^hatena|^hobbit|^hotzonu|^hwcdn/|^jeode/|^jetty/|^jigsaw|^linkdex|^metauri|^microsoft bits|^movabletype|^mozilla/\\d\\.\\d \\(compatible;?\\)$|^mozilla/\\d\\.\\d \\w*$|^navermailapp|^netsurf|^nuclei|^offline explorer|^php|^postman|^postrank|^python|^rank|^read|^reed|^rest|^serf|^snapchat|^space bison|^svn|^swcd |^taringa|^thumbor/|^tumblr/|^user-agent:|^valid|^venus/fedoraplanet|^w3c|^webbandit/|^webcopier|^wget|^whatsapp|^xenu link sleuth|^yahoo|^yandex|^zdm/\\d|^zoom marketplace/|^{{.*}}$|adbeat\\.com|appinsights|archive|ask jeeves/teoma|bit\\.ly/|bluecoat drtr|browsex|burpcollaborator|capture|catch|check|chrome-lighthouse|chromeframe|classifier|cloud|crawl|cryptoapi|dareboost|datanyze|dataprovider|dejaclick|dmbrowser|download|evc-batch/|feed|firephp|freesafeip|gomezagent|headless|httrack|hubspot marketing grader|hydra|ibisbrowser|images|inspect|iplabel|ips-agent|java(?!;)|library|mail\\.ru/|manager|monitor|neustar wpm|nutch|offbyone|optimize|pageburst|parser|perl|phantom|pingdom|powermarks|preview|proxy|ptst[ /]\\d|reader|reputation|resolver|retriever|rexx;|rigor|robot|rss|scan|scrape|server|sogou|sparkler/|speedcurve|spider|splash|statuscake|stumbleupon\\.com|supercleaner|synapse|synthetic|torrent|trace|transcoder|twingly recon|url|virtuoso|wappalyzer|webglance|webkit2png|whatcms/|wordpress|zgrab";
+var naivePattern = /bot|spider|crawl|http|lighthouse/i;
+var usedPattern;
 function isbot(userAgent) {
   if (typeof usedPattern > "u")
     try {
@@ -30732,18 +30041,14 @@ function isbot(userAgent) {
     }
   return Boolean(userAgent) && usedPattern.test(userAgent);
 }
-var createIsbot = (customPattern) => (userAgent) => Boolean(userAgent) && customPattern.test(userAgent), createIsbotFromList = (list2) => {
-  let pattern2 = new RegExp(list2.join("|"), "i");
-  return (userAgent) => Boolean(userAgent) && pattern2.test(userAgent);
-}, isbotMatch = (userAgent) => userAgent?.match(pattern)?.[0] ?? null, isbotMatches = (userAgent) => list.map((part) => userAgent?.match(new RegExp(part, "i"))?.[0]).filter(Boolean), isbotPattern = (userAgent) => userAgent ? list.find((pattern2) => new RegExp(pattern2, "i").test(userAgent)) ?? null : null, isbotPatterns = (userAgent) => userAgent ? list.filter((pattern2) => new RegExp(pattern2, "i").test(userAgent)) : [];
 
-// node_modules/@remix-run/dev/dist/config/defaults/entry.server.cloudflare.tsx
-var import_server4 = __toESM(require_server_browser()), import_jsx_dev_runtime = __toESM(require_jsx_dev_runtime());
+// app/entry.server.tsx
+var import_server4 = __toESM(require_server_browser(), 1), import_jsx_dev_runtime = __toESM(require_jsx_dev_runtime(), 1);
 async function handleRequest(request, responseStatusCode, responseHeaders, remixContext, loadContext) {
   let body = await (0, import_server4.renderToReadableStream)(
     /* @__PURE__ */ (0, import_jsx_dev_runtime.jsxDEV)(RemixServer, { context: remixContext, url: request.url }, void 0, !1, {
-      fileName: "node_modules/@remix-run/dev/dist/config/defaults/entry.server.cloudflare.tsx",
-      lineNumber: 14,
+      fileName: "app/entry.server.tsx",
+      lineNumber: 23,
       columnNumber: 5
     }, this),
     {
@@ -30753,791 +30058,168 @@ async function handleRequest(request, responseStatusCode, responseHeaders, remix
       }
     }
   );
-  return isBotRequest(request.headers.get("user-agent")) && await body.allReady, responseHeaders.set("Content-Type", "text/html"), new Response(body, {
+  return isbot(request.headers.get("user-agent") || "") && await body.allReady, responseHeaders.set("Content-Type", "text/html"), new Response(body, {
     headers: responseHeaders,
     status: responseStatusCode
   });
-}
-function isBotRequest(userAgent) {
-  return userAgent ? "isbot" in isbot_exports && typeof isbot == "function" ? isbot(userAgent) : "default" in isbot_exports && typeof void 0 == "function" ? (void 0)(userAgent) : !1 : !1;
 }
 
 // app/root.tsx
 var root_exports = {};
 __export(root_exports, {
   default: () => App,
-  links: () => links,
-  loader: () => loader
+  links: () => links
 });
-var import_cloudflare2 = __toESM(require_dist(), 1);
-
-// app/app.css
-var app_default = "/build/_assets/app-V3UKCKY4.css";
-
-// node_modules/match-sorter/dist/match-sorter.esm.js
-var import_remove_accents = __toESM(require_remove_accents());
-var rankings = {
-  CASE_SENSITIVE_EQUAL: 7,
-  EQUAL: 6,
-  STARTS_WITH: 5,
-  WORD_STARTS_WITH: 4,
-  CONTAINS: 3,
-  ACRONYM: 2,
-  MATCHES: 1,
-  NO_MATCH: 0
-}, defaultBaseSortFn = (a, b) => String(a.rankedValue).localeCompare(String(b.rankedValue));
-function matchSorter(items, value, options) {
-  options === void 0 && (options = {});
-  let {
-    keys,
-    threshold = rankings.MATCHES,
-    baseSort = defaultBaseSortFn,
-    sorter = (matchedItems2) => matchedItems2.sort((a, b) => sortRankedValues(a, b, baseSort))
-  } = options, matchedItems = items.reduce(reduceItemsToRanked, []);
-  return sorter(matchedItems).map((_ref) => {
-    let {
-      item
-    } = _ref;
-    return item;
-  });
-  function reduceItemsToRanked(matches, item, index) {
-    let rankingInfo = getHighestRanking(item, keys, value, options), {
-      rank,
-      keyThreshold = threshold
-    } = rankingInfo;
-    return rank >= keyThreshold && matches.push({
-      ...rankingInfo,
-      item,
-      index
-    }), matches;
-  }
-}
-matchSorter.rankings = rankings;
-function getHighestRanking(item, keys, value, options) {
-  if (!keys) {
-    let stringItem = item;
-    return {
-      // ends up being duplicate of 'item' in matches but consistent
-      rankedValue: stringItem,
-      rank: getMatchRanking(stringItem, value, options),
-      keyIndex: -1,
-      keyThreshold: options.threshold
-    };
-  }
-  return getAllValuesToRank(item, keys).reduce((_ref2, _ref3, i) => {
-    let {
-      rank,
-      rankedValue,
-      keyIndex,
-      keyThreshold
-    } = _ref2, {
-      itemValue,
-      attributes
-    } = _ref3, newRank = getMatchRanking(itemValue, value, options), newRankedValue = rankedValue, {
-      minRanking,
-      maxRanking,
-      threshold
-    } = attributes;
-    return newRank < minRanking && newRank >= rankings.MATCHES ? newRank = minRanking : newRank > maxRanking && (newRank = maxRanking), newRank > rank && (rank = newRank, keyIndex = i, keyThreshold = threshold, newRankedValue = itemValue), {
-      rankedValue: newRankedValue,
-      rank,
-      keyIndex,
-      keyThreshold
-    };
-  }, {
-    rankedValue: item,
-    rank: rankings.NO_MATCH,
-    keyIndex: -1,
-    keyThreshold: options.threshold
-  });
-}
-function getMatchRanking(testString, stringToRank, options) {
-  return testString = prepareValueForComparison(testString, options), stringToRank = prepareValueForComparison(stringToRank, options), stringToRank.length > testString.length ? rankings.NO_MATCH : testString === stringToRank ? rankings.CASE_SENSITIVE_EQUAL : (testString = testString.toLowerCase(), stringToRank = stringToRank.toLowerCase(), testString === stringToRank ? rankings.EQUAL : testString.startsWith(stringToRank) ? rankings.STARTS_WITH : testString.includes(` ${stringToRank}`) ? rankings.WORD_STARTS_WITH : testString.includes(stringToRank) ? rankings.CONTAINS : stringToRank.length === 1 ? rankings.NO_MATCH : getAcronym(testString).includes(stringToRank) ? rankings.ACRONYM : getClosenessRanking(testString, stringToRank));
-}
-function getAcronym(string) {
-  let acronym = "";
-  return string.split(" ").forEach((wordInString) => {
-    wordInString.split("-").forEach((splitByHyphenWord) => {
-      acronym += splitByHyphenWord.substr(0, 1);
-    });
-  }), acronym;
-}
-function getClosenessRanking(testString, stringToRank) {
-  let matchingInOrderCharCount = 0, charNumber = 0;
-  function findMatchingCharacter(matchChar, string, index) {
-    for (let j = index, J = string.length; j < J; j++)
-      if (string[j] === matchChar)
-        return matchingInOrderCharCount += 1, j + 1;
-    return -1;
-  }
-  function getRanking(spread2) {
-    let spreadPercentage = 1 / spread2, inOrderPercentage = matchingInOrderCharCount / stringToRank.length;
-    return rankings.MATCHES + inOrderPercentage * spreadPercentage;
-  }
-  let firstIndex = findMatchingCharacter(stringToRank[0], testString, 0);
-  if (firstIndex < 0)
-    return rankings.NO_MATCH;
-  charNumber = firstIndex;
-  for (let i = 1, I = stringToRank.length; i < I; i++) {
-    let matchChar = stringToRank[i];
-    if (charNumber = findMatchingCharacter(matchChar, testString, charNumber), !(charNumber > -1))
-      return rankings.NO_MATCH;
-  }
-  let spread = charNumber - firstIndex;
-  return getRanking(spread);
-}
-function sortRankedValues(a, b, baseSort) {
-  let {
-    rank: aRank,
-    keyIndex: aKeyIndex
-  } = a, {
-    rank: bRank,
-    keyIndex: bKeyIndex
-  } = b;
-  return aRank === bRank ? aKeyIndex === bKeyIndex ? baseSort(a, b) : aKeyIndex < bKeyIndex ? -1 : 1 : aRank > bRank ? -1 : 1;
-}
-function prepareValueForComparison(value, _ref4) {
-  let {
-    keepDiacritics
-  } = _ref4;
-  return value = `${value}`, keepDiacritics || (value = (0, import_remove_accents.default)(value)), value;
-}
-function getItemValues(item, key) {
-  typeof key == "object" && (key = key.key);
-  let value;
-  if (typeof key == "function")
-    value = key(item);
-  else if (item == null)
-    value = null;
-  else if (Object.hasOwn(item, key))
-    value = item[key];
-  else {
-    if (key.includes("."))
-      return getNestedValues(key, item);
-    value = null;
-  }
-  return value == null ? [] : Array.isArray(value) ? value : [String(value)];
-}
-function getNestedValues(path, item) {
-  let keys = path.split("."), values = [item];
-  for (let i = 0, I = keys.length; i < I; i++) {
-    let nestedKey = keys[i], nestedValues = [];
-    for (let j = 0, J = values.length; j < J; j++) {
-      let nestedItem = values[j];
-      if (nestedItem != null)
-        if (Object.hasOwn(nestedItem, nestedKey)) {
-          let nestedValue = nestedItem[nestedKey];
-          nestedValue != null && nestedValues.push(nestedValue);
-        } else
-          nestedKey === "*" && (nestedValues = nestedValues.concat(nestedItem));
-    }
-    values = nestedValues;
-  }
-  return Array.isArray(values[0]) ? [].concat(...values) : values;
-}
-function getAllValuesToRank(item, keys) {
-  let allValues = [];
-  for (let j = 0, J = keys.length; j < J; j++) {
-    let key = keys[j], attributes = getKeyAttributes(key), itemValues = getItemValues(item, key);
-    for (let i = 0, I = itemValues.length; i < I; i++)
-      allValues.push({
-        itemValue: itemValues[i],
-        attributes
-      });
-  }
-  return allValues;
-}
-var defaultKeyAttributes = {
-  maxRanking: 1 / 0,
-  minRanking: -1 / 0
-};
-function getKeyAttributes(key) {
-  return typeof key == "string" ? defaultKeyAttributes : {
-    ...defaultKeyAttributes,
-    ...key
-  };
-}
-
-// app/data.ts
-var import_sort_by = __toESM(require_sort_by(), 1);
-
-// node_modules/tiny-invariant/dist/esm/tiny-invariant.js
-var isProduction = !1, prefix = "Invariant failed";
-function invariant4(condition, message) {
-  if (!condition) {
-    if (isProduction)
-      throw new Error(prefix);
-    var provided = typeof message == "function" ? message() : message, value = provided ? "".concat(prefix, ": ").concat(provided) : prefix;
-    throw new Error(value);
-  }
-}
-
-// app/data.ts
-var fakeContacts = {
-  records: {},
-  async getAll() {
-    return Object.keys(fakeContacts.records).map((key) => fakeContacts.records[key]).sort((0, import_sort_by.default)("-createdAt", "last"));
-  },
-  async get(id) {
-    return fakeContacts.records[id] || null;
-  },
-  async create(values) {
-    let id = values.id || Math.random().toString(36).substring(2, 9), createdAt = (/* @__PURE__ */ new Date()).toISOString(), newContact = { id, createdAt, ...values };
-    return fakeContacts.records[id] = newContact, newContact;
-  },
-  async set(id, values) {
-    let contact = await fakeContacts.get(id);
-    invariant4(contact, `No contact found for ${id}`);
-    let updatedContact = { ...contact, ...values };
-    return fakeContacts.records[id] = updatedContact, updatedContact;
-  },
-  destroy(id) {
-    return delete fakeContacts.records[id], null;
-  }
-};
-async function getContacts(query) {
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  let contacts = await fakeContacts.getAll();
-  return query && (contacts = matchSorter(contacts, query, {
-    keys: ["first", "last"]
-  })), contacts.sort((0, import_sort_by.default)("last", "createdAt"));
-}
-async function getContact(id) {
-  return fakeContacts.get(id);
-}
-[
-  {
-    avatar: "https://sessionize.com/image/124e-400o400o2-wHVdAuNaxi8KJrgtN3ZKci.jpg",
-    first: "Shruti",
-    last: "Kapoor",
-    twitter: "@shrutikapoor08"
-  },
-  {
-    avatar: "https://sessionize.com/image/1940-400o400o2-Enh9dnYmrLYhJSTTPSw3MH.jpg",
-    first: "Glenn",
-    last: "Reyes",
-    twitter: "@glnnrys"
-  },
-  {
-    avatar: "https://sessionize.com/image/9273-400o400o2-3tyrUE3HjsCHJLU5aUJCja.jpg",
-    first: "Ryan",
-    last: "Florence"
-  },
-  {
-    avatar: "https://sessionize.com/image/d14d-400o400o2-pyB229HyFPCnUcZhHf3kWS.png",
-    first: "Oscar",
-    last: "Newman",
-    twitter: "@__oscarnewman"
-  },
-  {
-    avatar: "https://sessionize.com/image/fd45-400o400o2-fw91uCdGU9hFP334dnyVCr.jpg",
-    first: "Michael",
-    last: "Jackson"
-  },
-  {
-    avatar: "https://sessionize.com/image/b07e-400o400o2-KgNRF3S9sD5ZR4UsG7hG4g.jpg",
-    first: "Christopher",
-    last: "Chedeau",
-    twitter: "@Vjeux"
-  },
-  {
-    avatar: "https://sessionize.com/image/262f-400o400o2-UBPQueK3fayaCmsyUc1Ljf.jpg",
-    first: "Cameron",
-    last: "Matheson",
-    twitter: "@cmatheson"
-  },
-  {
-    avatar: "https://sessionize.com/image/820b-400o400o2-Ja1KDrBAu5NzYTPLSC3GW8.jpg",
-    first: "Brooks",
-    last: "Lybrand",
-    twitter: "@BrooksLybrand"
-  },
-  {
-    avatar: "https://sessionize.com/image/df38-400o400o2-JwbChVUj6V7DwZMc9vJEHc.jpg",
-    first: "Alex",
-    last: "Anderson",
-    twitter: "@ralex1993"
-  },
-  {
-    avatar: "https://sessionize.com/image/5578-400o400o2-BMT43t5kd2U1XstaNnM6Ax.jpg",
-    first: "Kent C.",
-    last: "Dodds",
-    twitter: "@kentcdodds"
-  },
-  {
-    avatar: "https://sessionize.com/image/c9d5-400o400o2-Sri5qnQmscaJXVB8m3VBgf.jpg",
-    first: "Nevi",
-    last: "Shah",
-    twitter: "@nevikashah"
-  },
-  {
-    avatar: "https://sessionize.com/image/2694-400o400o2-MYYTsnszbLKTzyqJV17w2q.png",
-    first: "Andrew",
-    last: "Petersen"
-  },
-  {
-    avatar: "https://sessionize.com/image/907a-400o400o2-9TM2CCmvrw6ttmJiTw4Lz8.jpg",
-    first: "Scott",
-    last: "Smerchek",
-    twitter: "@smerchek"
-  },
-  {
-    avatar: "https://sessionize.com/image/08be-400o400o2-WtYGFFR1ZUJHL9tKyVBNPV.jpg",
-    first: "Giovanni",
-    last: "Benussi",
-    twitter: "@giovannibenussi"
-  },
-  {
-    avatar: "https://sessionize.com/image/f814-400o400o2-n2ua5nM9qwZA2hiGdr1T7N.jpg",
-    first: "Igor",
-    last: "Minar",
-    twitter: "@IgorMinar"
-  },
-  {
-    avatar: "https://sessionize.com/image/fb82-400o400o2-LbvwhTVMrYLDdN3z4iEFMp.jpeg",
-    first: "Brandon",
-    last: "Kish"
-  },
-  {
-    avatar: "https://sessionize.com/image/fcda-400o400o2-XiYRtKK5Dvng5AeyC8PiUA.png",
-    first: "Arisa",
-    last: "Fukuzaki",
-    twitter: "@arisa_dev"
-  },
-  {
-    avatar: "https://sessionize.com/image/c8c3-400o400o2-PR5UsgApAVEADZRixV4H8e.jpeg",
-    first: "Alexandra",
-    last: "Spalato",
-    twitter: "@alexadark"
-  },
-  {
-    avatar: "https://sessionize.com/image/7594-400o400o2-hWtdCjbdFdLgE2vEXBJtyo.jpg",
-    first: "Cat",
-    last: "Johnson"
-  },
-  {
-    avatar: "https://sessionize.com/image/5636-400o400o2-TWgi8vELMFoB3hB9uPw62d.jpg",
-    first: "Ashley",
-    last: "Narcisse",
-    twitter: "@_darkfadr"
-  },
-  {
-    avatar: "https://sessionize.com/image/6aeb-400o400o2-Q5tAiuzKGgzSje9ZsK3Yu5.JPG",
-    first: "Edmund",
-    last: "Hung",
-    twitter: "@_edmundhung"
-  },
-  {
-    avatar: "https://sessionize.com/image/30f1-400o400o2-wJBdJ6sFayjKmJycYKoHSe.jpg",
-    first: "Clifford",
-    last: "Fajardo",
-    twitter: "@cliffordfajard0"
-  },
-  {
-    avatar: "https://sessionize.com/image/6faa-400o400o2-amseBRDkdg7wSK5tjsFDiG.jpg",
-    first: "Erick",
-    last: "Tamayo",
-    twitter: "@ericktamayo"
-  },
-  {
-    avatar: "https://sessionize.com/image/feba-400o400o2-R4GE7eqegJNFf3cQ567obs.jpg",
-    first: "Paul",
-    last: "Bratslavsky",
-    twitter: "@codingthirty"
-  },
-  {
-    avatar: "https://sessionize.com/image/c315-400o400o2-spjM5A6VVfVNnQsuwvX3DY.jpg",
-    first: "Pedro",
-    last: "Cattori",
-    twitter: "@pcattori"
-  },
-  {
-    avatar: "https://sessionize.com/image/eec1-400o400o2-HkvWKLFqecmFxLwqR9KMRw.jpg",
-    first: "Andre",
-    last: "Landgraf",
-    twitter: "@AndreLandgraf94"
-  },
-  {
-    avatar: "https://sessionize.com/image/c73a-400o400o2-4MTaTq6ftC15hqwtqUJmTC.jpg",
-    first: "Monica",
-    last: "Powell",
-    twitter: "@indigitalcolor"
-  },
-  {
-    avatar: "https://sessionize.com/image/cef7-400o400o2-KBZUydbjfkfGACQmjbHEvX.jpeg",
-    first: "Brian",
-    last: "Lee",
-    twitter: "@brian_dlee"
-  },
-  {
-    avatar: "https://sessionize.com/image/f83b-400o400o2-Pyw3chmeHMxGsNoj3nQmWU.jpg",
-    first: "Sean",
-    last: "McQuaid",
-    twitter: "@SeanMcQuaidCode"
-  },
-  {
-    avatar: "https://sessionize.com/image/a9fc-400o400o2-JHBnWZRoxp7QX74Hdac7AZ.jpg",
-    first: "Shane",
-    last: "Walker",
-    twitter: "@swalker326"
-  },
-  {
-    avatar: "https://sessionize.com/image/6644-400o400o2-aHnGHb5Pdu3D32MbfrnQbj.jpg",
-    first: "Jon",
-    last: "Jensen",
-    twitter: "@jenseng"
-  }
-].forEach((contact) => {
-  fakeContacts.create({
-    ...contact,
-    id: `${contact.first.toLowerCase()}-${contact.last.toLocaleLowerCase()}`
-  });
-});
-
-// app/root.tsx
 var import_jsx_dev_runtime2 = __toESM(require_jsx_dev_runtime(), 1), links = () => [
-  { rel: "stylesheet", href: app_default }
-], loader = async () => {
-  let contacts = await getContacts();
-  return (0, import_cloudflare2.json)({ contacts });
-};
+  ...void 0 ? [{ rel: "stylesheet", href: void 0 }] : []
+];
 function App() {
-  let { contacts } = useLoaderData2();
   return /* @__PURE__ */ (0, import_jsx_dev_runtime2.jsxDEV)("html", { lang: "en", children: [
     /* @__PURE__ */ (0, import_jsx_dev_runtime2.jsxDEV)("head", { children: [
       /* @__PURE__ */ (0, import_jsx_dev_runtime2.jsxDEV)("meta", { charSet: "utf-8" }, void 0, !1, {
         fileName: "app/root.tsx",
-        lineNumber: 32,
+        lineNumber: 20,
         columnNumber: 9
       }, this),
       /* @__PURE__ */ (0, import_jsx_dev_runtime2.jsxDEV)("meta", { name: "viewport", content: "width=device-width, initial-scale=1" }, void 0, !1, {
         fileName: "app/root.tsx",
-        lineNumber: 33,
+        lineNumber: 21,
         columnNumber: 9
       }, this),
       /* @__PURE__ */ (0, import_jsx_dev_runtime2.jsxDEV)(Meta, {}, void 0, !1, {
         fileName: "app/root.tsx",
-        lineNumber: 34,
+        lineNumber: 22,
         columnNumber: 9
       }, this),
       /* @__PURE__ */ (0, import_jsx_dev_runtime2.jsxDEV)(Links, {}, void 0, !1, {
         fileName: "app/root.tsx",
-        lineNumber: 35,
+        lineNumber: 23,
         columnNumber: 9
       }, this)
     ] }, void 0, !0, {
       fileName: "app/root.tsx",
-      lineNumber: 31,
+      lineNumber: 19,
       columnNumber: 7
     }, this),
     /* @__PURE__ */ (0, import_jsx_dev_runtime2.jsxDEV)("body", { children: [
-      /* @__PURE__ */ (0, import_jsx_dev_runtime2.jsxDEV)("div", { id: "sidebar", children: [
-        /* @__PURE__ */ (0, import_jsx_dev_runtime2.jsxDEV)("h1", { children: "Remix Contacts" }, void 0, !1, {
-          fileName: "app/root.tsx",
-          lineNumber: 39,
-          columnNumber: 11
-        }, this),
-        /* @__PURE__ */ (0, import_jsx_dev_runtime2.jsxDEV)("div", { children: [
-          /* @__PURE__ */ (0, import_jsx_dev_runtime2.jsxDEV)(Form, { id: "search-form", role: "search", children: [
-            /* @__PURE__ */ (0, import_jsx_dev_runtime2.jsxDEV)(
-              "input",
-              {
-                id: "q",
-                "aria-label": "Search contacts",
-                placeholder: "Search",
-                type: "search",
-                name: "q"
-              },
-              void 0,
-              !1,
-              {
-                fileName: "app/root.tsx",
-                lineNumber: 42,
-                columnNumber: 15
-              },
-              this
-            ),
-            /* @__PURE__ */ (0, import_jsx_dev_runtime2.jsxDEV)("div", { id: "search-spinner", "aria-hidden": !0, hidden: !0 }, void 0, !1, {
-              fileName: "app/root.tsx",
-              lineNumber: 49,
-              columnNumber: 15
-            }, this)
-          ] }, void 0, !0, {
-            fileName: "app/root.tsx",
-            lineNumber: 41,
-            columnNumber: 13
-          }, this),
-          /* @__PURE__ */ (0, import_jsx_dev_runtime2.jsxDEV)(Form, { method: "post", children: /* @__PURE__ */ (0, import_jsx_dev_runtime2.jsxDEV)("button", { type: "submit", children: "New" }, void 0, !1, {
-            fileName: "app/root.tsx",
-            lineNumber: 52,
-            columnNumber: 15
-          }, this) }, void 0, !1, {
-            fileName: "app/root.tsx",
-            lineNumber: 51,
-            columnNumber: 13
-          }, this)
-        ] }, void 0, !0, {
-          fileName: "app/root.tsx",
-          lineNumber: 40,
-          columnNumber: 11
-        }, this),
-        /* @__PURE__ */ (0, import_jsx_dev_runtime2.jsxDEV)("nav", { children: contacts.length ? /* @__PURE__ */ (0, import_jsx_dev_runtime2.jsxDEV)("ul", { children: contacts.map(
-          (contact) => /* @__PURE__ */ (0, import_jsx_dev_runtime2.jsxDEV)("li", { children: /* @__PURE__ */ (0, import_jsx_dev_runtime2.jsxDEV)(Link2, { to: `contacts/${contact.id}`, children: [
-            contact.first || contact.last ? /* @__PURE__ */ (0, import_jsx_dev_runtime2.jsxDEV)(import_jsx_dev_runtime2.Fragment, { children: [
-              contact.first,
-              " ",
-              contact.last
-            ] }, void 0, !0, {
-              fileName: "app/root.tsx",
-              lineNumber: 62,
-              columnNumber: 19
-            }, this) : /* @__PURE__ */ (0, import_jsx_dev_runtime2.jsxDEV)("i", { children: "No Name" }, void 0, !1, {
-              fileName: "app/root.tsx",
-              lineNumber: 66,
-              columnNumber: 19
-            }, this),
-            " ",
-            contact.favorite ? /* @__PURE__ */ (0, import_jsx_dev_runtime2.jsxDEV)("span", { children: "\u2605" }, void 0, !1, {
-              fileName: "app/root.tsx",
-              lineNumber: 69,
-              columnNumber: 19
-            }, this) : null
-          ] }, void 0, !0, {
-            fileName: "app/root.tsx",
-            lineNumber: 60,
-            columnNumber: 21
-          }, this) }, contact.id, !1, {
-            fileName: "app/root.tsx",
-            lineNumber: 59,
-            columnNumber: 15
-          }, this)
-        ) }, void 0, !1, {
-          fileName: "app/root.tsx",
-          lineNumber: 57,
-          columnNumber: 13
-        }, this) : /* @__PURE__ */ (0, import_jsx_dev_runtime2.jsxDEV)("p", { children: /* @__PURE__ */ (0, import_jsx_dev_runtime2.jsxDEV)("i", { children: "No contacts" }, void 0, !1, {
-          fileName: "app/root.tsx",
-          lineNumber: 77,
-          columnNumber: 17
-        }, this) }, void 0, !1, {
-          fileName: "app/root.tsx",
-          lineNumber: 76,
-          columnNumber: 13
-        }, this) }, void 0, !1, {
-          fileName: "app/root.tsx",
-          lineNumber: 55,
-          columnNumber: 11
-        }, this)
-      ] }, void 0, !0, {
+      /* @__PURE__ */ (0, import_jsx_dev_runtime2.jsxDEV)(Outlet, {}, void 0, !1, {
         fileName: "app/root.tsx",
-        lineNumber: 38,
-        columnNumber: 9
-      }, this),
-      /* @__PURE__ */ (0, import_jsx_dev_runtime2.jsxDEV)("div", { id: "detail", children: /* @__PURE__ */ (0, import_jsx_dev_runtime2.jsxDEV)(Outlet, {}, void 0, !1, {
-        fileName: "app/root.tsx",
-        lineNumber: 83,
-        columnNumber: 11
-      }, this) }, void 0, !1, {
-        fileName: "app/root.tsx",
-        lineNumber: 82,
+        lineNumber: 26,
         columnNumber: 9
       }, this),
       /* @__PURE__ */ (0, import_jsx_dev_runtime2.jsxDEV)(ScrollRestoration2, {}, void 0, !1, {
         fileName: "app/root.tsx",
-        lineNumber: 86,
+        lineNumber: 27,
         columnNumber: 9
       }, this),
       /* @__PURE__ */ (0, import_jsx_dev_runtime2.jsxDEV)(Scripts, {}, void 0, !1, {
         fileName: "app/root.tsx",
-        lineNumber: 87,
+        lineNumber: 28,
         columnNumber: 9
       }, this),
       /* @__PURE__ */ (0, import_jsx_dev_runtime2.jsxDEV)(LiveReload, {}, void 0, !1, {
         fileName: "app/root.tsx",
-        lineNumber: 88,
+        lineNumber: 29,
         columnNumber: 9
       }, this)
     ] }, void 0, !0, {
       fileName: "app/root.tsx",
-      lineNumber: 37,
+      lineNumber: 25,
       columnNumber: 7
     }, this)
   ] }, void 0, !0, {
     fileName: "app/root.tsx",
-    lineNumber: 30,
+    lineNumber: 18,
     columnNumber: 5
   }, this);
 }
 
-// app/routes/contacts.$contactId.tsx
-var contacts_contactId_exports = {};
-__export(contacts_contactId_exports, {
-  default: () => Contact,
-  loader: () => loader2
+// app/routes/_index.tsx
+var index_exports = {};
+__export(index_exports, {
+  default: () => Index,
+  meta: () => meta
 });
-var import_cloudflare3 = __toESM(require_dist(), 1);
-var import_jsx_dev_runtime3 = __toESM(require_jsx_dev_runtime(), 1), loader2 = async ({
-  params
-}) => {
-  invariant4(params.contactId, "Missing contactId param");
-  let contact = await getContact(params.contactId);
-  if (!contact)
-    throw new Response("Not Found", { status: 404 });
-  return (0, import_cloudflare3.json)({ contact });
-};
-function Contact() {
-  let { contact } = useLoaderData2();
-  return /* @__PURE__ */ (0, import_jsx_dev_runtime3.jsxDEV)("div", { id: "contact", children: [
-    /* @__PURE__ */ (0, import_jsx_dev_runtime3.jsxDEV)("div", { children: /* @__PURE__ */ (0, import_jsx_dev_runtime3.jsxDEV)(
-      "img",
-      {
-        alt: `${contact.first} ${contact.last} avatar`,
-        src: contact.avatar
-      },
-      contact.avatar,
-      !1,
-      {
-        fileName: "app/routes/contacts.$contactId.tsx",
-        lineNumber: 26,
-        columnNumber: 9
-      },
-      this
-    ) }, void 0, !1, {
-      fileName: "app/routes/contacts.$contactId.tsx",
-      lineNumber: 25,
+var import_jsx_dev_runtime3 = __toESM(require_jsx_dev_runtime(), 1), meta = () => [
+  { title: "New Remix App" },
+  { name: "description", content: "Welcome to Remix!" }
+];
+function Index() {
+  return /* @__PURE__ */ (0, import_jsx_dev_runtime3.jsxDEV)("div", { style: { fontFamily: "system-ui, sans-serif", lineHeight: "1.8" }, children: [
+    /* @__PURE__ */ (0, import_jsx_dev_runtime3.jsxDEV)("h1", { children: "Welcome to Remix" }, void 0, !1, {
+      fileName: "app/routes/_index.tsx",
+      lineNumber: 13,
       columnNumber: 7
     }, this),
-    /* @__PURE__ */ (0, import_jsx_dev_runtime3.jsxDEV)("div", { children: [
-      /* @__PURE__ */ (0, import_jsx_dev_runtime3.jsxDEV)("h1", { children: [
-        contact.first || contact.last ? /* @__PURE__ */ (0, import_jsx_dev_runtime3.jsxDEV)(import_jsx_dev_runtime3.Fragment, { children: [
-          contact.first,
-          " ",
-          contact.last
-        ] }, void 0, !0, {
-          fileName: "app/routes/contacts.$contactId.tsx",
-          lineNumber: 36,
-          columnNumber: 13
-        }, this) : /* @__PURE__ */ (0, import_jsx_dev_runtime3.jsxDEV)("i", { children: "No Name" }, void 0, !1, {
-          fileName: "app/routes/contacts.$contactId.tsx",
-          lineNumber: 40,
-          columnNumber: 13
-        }, this),
-        " ",
-        /* @__PURE__ */ (0, import_jsx_dev_runtime3.jsxDEV)(Favorite, { contact }, void 0, !1, {
-          fileName: "app/routes/contacts.$contactId.tsx",
-          lineNumber: 42,
-          columnNumber: 11
-        }, this)
-      ] }, void 0, !0, {
-        fileName: "app/routes/contacts.$contactId.tsx",
-        lineNumber: 34,
-        columnNumber: 9
-      }, this),
-      contact.twitter ? /* @__PURE__ */ (0, import_jsx_dev_runtime3.jsxDEV)("p", { children: /* @__PURE__ */ (0, import_jsx_dev_runtime3.jsxDEV)(
+    /* @__PURE__ */ (0, import_jsx_dev_runtime3.jsxDEV)("ul", { children: [
+      /* @__PURE__ */ (0, import_jsx_dev_runtime3.jsxDEV)("li", { children: /* @__PURE__ */ (0, import_jsx_dev_runtime3.jsxDEV)(
         "a",
         {
-          href: `https://twitter.com/${contact.twitter}`,
-          children: contact.twitter
+          target: "_blank",
+          href: "https://remix.run/tutorials/blog",
+          rel: "noreferrer",
+          children: "15m Quickstart Blog Tutorial"
         },
         void 0,
         !1,
         {
-          fileName: "app/routes/contacts.$contactId.tsx",
-          lineNumber: 47,
-          columnNumber: 13
+          fileName: "app/routes/_index.tsx",
+          lineNumber: 16,
+          columnNumber: 11
         },
         this
       ) }, void 0, !1, {
-        fileName: "app/routes/contacts.$contactId.tsx",
-        lineNumber: 46,
-        columnNumber: 11
-      }, this) : null,
-      contact.notes ? /* @__PURE__ */ (0, import_jsx_dev_runtime3.jsxDEV)("p", { children: contact.notes }, void 0, !1, {
-        fileName: "app/routes/contacts.$contactId.tsx",
-        lineNumber: 55,
-        columnNumber: 26
-      }, this) : null,
-      /* @__PURE__ */ (0, import_jsx_dev_runtime3.jsxDEV)("div", { children: [
-        /* @__PURE__ */ (0, import_jsx_dev_runtime3.jsxDEV)(Form, { action: "edit", children: /* @__PURE__ */ (0, import_jsx_dev_runtime3.jsxDEV)("button", { type: "submit", children: "Edit" }, void 0, !1, {
-          fileName: "app/routes/contacts.$contactId.tsx",
-          lineNumber: 59,
-          columnNumber: 13
-        }, this) }, void 0, !1, {
-          fileName: "app/routes/contacts.$contactId.tsx",
-          lineNumber: 58,
+        fileName: "app/routes/_index.tsx",
+        lineNumber: 15,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ (0, import_jsx_dev_runtime3.jsxDEV)("li", { children: /* @__PURE__ */ (0, import_jsx_dev_runtime3.jsxDEV)(
+        "a",
+        {
+          target: "_blank",
+          href: "https://remix.run/tutorials/jokes",
+          rel: "noreferrer",
+          children: "Deep Dive Jokes App Tutorial"
+        },
+        void 0,
+        !1,
+        {
+          fileName: "app/routes/_index.tsx",
+          lineNumber: 25,
           columnNumber: 11
-        }, this),
-        /* @__PURE__ */ (0, import_jsx_dev_runtime3.jsxDEV)(
-          Form,
-          {
-            action: "destroy",
-            method: "post",
-            onSubmit: (event) => {
-              confirm(
-                "Please confirm you want to delete this record."
-              ) || event.preventDefault();
-            },
-            children: /* @__PURE__ */ (0, import_jsx_dev_runtime3.jsxDEV)("button", { type: "submit", children: "Delete" }, void 0, !1, {
-              fileName: "app/routes/contacts.$contactId.tsx",
-              lineNumber: 74,
-              columnNumber: 13
-            }, this)
-          },
-          void 0,
-          !1,
-          {
-            fileName: "app/routes/contacts.$contactId.tsx",
-            lineNumber: 62,
-            columnNumber: 11
-          },
-          this
-        )
-      ] }, void 0, !0, {
-        fileName: "app/routes/contacts.$contactId.tsx",
-        lineNumber: 57,
+        },
+        this
+      ) }, void 0, !1, {
+        fileName: "app/routes/_index.tsx",
+        lineNumber: 24,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ (0, import_jsx_dev_runtime3.jsxDEV)("li", { children: /* @__PURE__ */ (0, import_jsx_dev_runtime3.jsxDEV)("a", { target: "_blank", href: "https://remix.run/docs", rel: "noreferrer", children: "Remix Docs" }, void 0, !1, {
+        fileName: "app/routes/_index.tsx",
+        lineNumber: 34,
+        columnNumber: 11
+      }, this) }, void 0, !1, {
+        fileName: "app/routes/_index.tsx",
+        lineNumber: 33,
         columnNumber: 9
       }, this)
     ] }, void 0, !0, {
-      fileName: "app/routes/contacts.$contactId.tsx",
-      lineNumber: 33,
+      fileName: "app/routes/_index.tsx",
+      lineNumber: 14,
       columnNumber: 7
     }, this)
   ] }, void 0, !0, {
-    fileName: "app/routes/contacts.$contactId.tsx",
-    lineNumber: 24,
+    fileName: "app/routes/_index.tsx",
+    lineNumber: 12,
     columnNumber: 5
   }, this);
 }
-var Favorite = ({ contact }) => {
-  let favorite = contact.favorite;
-  return /* @__PURE__ */ (0, import_jsx_dev_runtime3.jsxDEV)(Form, { method: "post", children: /* @__PURE__ */ (0, import_jsx_dev_runtime3.jsxDEV)(
-    "button",
-    {
-      "aria-label": favorite ? "Remove from favorites" : "Add to favorites",
-      name: "favorite",
-      value: favorite ? "false" : "true",
-      children: favorite ? "\u2605" : "\u2606"
-    },
-    void 0,
-    !1,
-    {
-      fileName: "app/routes/contacts.$contactId.tsx",
-      lineNumber: 89,
-      columnNumber: 7
-    },
-    this
-  ) }, void 0, !1, {
-    fileName: "app/routes/contacts.$contactId.tsx",
-    lineNumber: 88,
-    columnNumber: 5
-  }, this);
-};
 
 // server-assets-manifest:@remix-run/dev/assets-manifest
-var assets_manifest_default = { entry: { module: "/build/entry.client-YZXXIE6N.js", imports: ["/build/_shared/chunk-ZWGWGGVF.js", "/build/_shared/chunk-WSWXLADY.js", "/build/_shared/chunk-XU7DNSPJ.js", "/build/_shared/chunk-GIAAE3CH.js", "/build/_shared/chunk-BOXFZXVX.js", "/build/_shared/chunk-5LLQLIQE.js", "/build/_shared/chunk-UWV35TSL.js", "/build/_shared/chunk-PNG5AS42.js"] }, routes: { root: { id: "root", parentId: void 0, path: "", index: void 0, caseSensitive: void 0, module: "/build/root-F3PIMF27.js", imports: ["/build/_shared/chunk-NFYMXIMP.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/contacts.$contactId": { id: "routes/contacts.$contactId", parentId: "root", path: "contacts/:contactId", index: void 0, caseSensitive: void 0, module: "/build/routes/contacts.$contactId-M4L4RP5T.js", imports: void 0, hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 } }, version: "f948dd51", hmr: { runtime: "/build/_shared\\chunk-5LLQLIQE.js", timestamp: 1705819506682 }, url: "/build/manifest-F948DD51.js" };
+var assets_manifest_default = { entry: { module: "/build/entry.client-CKUHRWFA.js", imports: ["/build/_shared/chunk-ZWGWGGVF.js", "/build/_shared/chunk-B4Q4SZFW.js", "/build/_shared/chunk-XU7DNSPJ.js", "/build/_shared/chunk-5LLQLIQE.js", "/build/_shared/chunk-UWV35TSL.js", "/build/_shared/chunk-GIAAE3CH.js", "/build/_shared/chunk-BOXFZXVX.js", "/build/_shared/chunk-PNG5AS42.js"] }, routes: { root: { id: "root", parentId: void 0, path: "", index: void 0, caseSensitive: void 0, module: "/build/root-PZO7USIC.js", imports: void 0, hasAction: !1, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/_index": { id: "routes/_index", parentId: "root", path: void 0, index: !0, caseSensitive: void 0, module: "/build/routes/_index-N3T2QKFI.js", imports: void 0, hasAction: !1, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 } }, version: "4aeeb50b", hmr: { runtime: "/build/_shared\\chunk-5LLQLIQE.js", timestamp: 1705821689495 }, url: "/build/manifest-4AEEB50B.js" };
 
 // server-entry-module:@remix-run/dev/server-build
-var mode = "development", assetsBuildDirectory = "public\\build", future = { v3_fetcherPersist: !1, v3_relativeSplatPath: !1 }, publicPath = "/build/", entry = { module: entry_server_cloudflare_exports }, routes = {
+var mode = "development", assetsBuildDirectory = "public\\build", future = { v3_fetcherPersist: !1, v3_relativeSplatPath: !1 }, publicPath = "/build/", entry = { module: entry_server_exports }, routes = {
   root: {
     id: "root",
     parentId: void 0,
@@ -31546,18 +30228,18 @@ var mode = "development", assetsBuildDirectory = "public\\build", future = { v3_
     caseSensitive: void 0,
     module: root_exports
   },
-  "routes/contacts.$contactId": {
-    id: "routes/contacts.$contactId",
+  "routes/_index": {
+    id: "routes/_index",
     parentId: "root",
-    path: "contacts/:contactId",
-    index: void 0,
+    path: void 0,
+    index: !0,
     caseSensitive: void 0,
-    module: contacts_contactId_exports
+    module: index_exports
   }
 };
 
 // server.ts
-(0, import_cloudflare4.logDevReady)(server_build_exports);
+(0, import_cloudflare2.logDevReady)(server_build_exports);
 var onRequest = createPagesFunctionHandler({
   build: server_build_exports,
   getLoadContext: (context) => ({ env: context.env }),
@@ -32169,14 +30851,6 @@ react/cjs/react-jsx-dev-runtime.development.js:
    * LICENSE.md file in the root directory of this source tree.
    *
    * @license MIT
-   *)
-
-match-sorter/dist/match-sorter.esm.js:
-  (**
-   * @name match-sorter
-   * @license MIT license.
-   * @copyright (c) 2020 Kent C. Dodds
-   * @author Kent C. Dodds <me@kentcdodds.com> (https://kentcdodds.com)
    *)
 */
 //# sourceMappingURL=[[path]].js.map

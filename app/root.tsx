@@ -1,31 +1,20 @@
 import type { LinksFunction } from "@remix-run/cloudflare";
-import { json } from "@remix-run/cloudflare";
+import { cssBundleHref } from "@remix-run/css-bundle";
 import {
   Form,
-  Link,
   Links,
   LiveReload,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
-  useLoaderData,
 } from "@remix-run/react";
-import appStyleHref from "./app.css";
-import { getContacts } from "./data";
 
 export const links: LinksFunction = () => [
-  { rel: "stylesheet", href: appStyleHref },
+  ...(cssBundleHref ? [{ rel: "stylesheet", href: cssBundleHref }] : []),
 ];
 
-export const loader = async () => {
-  const contacts = await getContacts();
-  return json({ contacts });
-};
-
 export default function App() {
-  const { contacts } = useLoaderData<typeof loader>();
-
   return (
     <html lang="en">
       <head>
@@ -53,34 +42,15 @@ export default function App() {
             </Form>
           </div>
           <nav>
-            {contacts.length ? (
-              <ul>
-                {contacts.map((contact) => (
-                  <li key={contact.id}>
-                    <Link to={`contacts/${contact.id}`}>
-                      {contact.first || contact.last ? (
-                        <>
-                          {contact.first} {contact.last}
-                        </>
-                      ) : (
-                        <i>No Name</i>
-                      )}{" "}
-                      {contact.favorite ? (
-                        <span>★</span>
-                      ) : null}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p>
-                <i>No contacts</i>
-              </p>
-            )}
+            <ul>
+              <li>
+                <a href={`/contacts/1`}>Your Name</a>
+              </li>
+              <li>
+                <a href={`/contacts/2`}>Your Friend</a>
+              </li>
+            </ul>
           </nav>
-        </div>
-        <div id="detail">
-          <Outlet />
         </div>
 
         <ScrollRestoration />

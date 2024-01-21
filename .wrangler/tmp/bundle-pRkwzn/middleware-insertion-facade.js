@@ -1,4 +1,4 @@
-				import worker, * as OTHER_EXPORTS from "C:\\Users\\jjohns\\remix\\conmix-jacobjohns-com\\.wrangler\\tmp\\pages-lclUV5\\eymale2qrbr.js";
+				import worker, * as OTHER_EXPORTS from "C:\\Users\\jjohns\\remix\\conmix-jacobjohns-com\\.wrangler\\tmp\\pages-tX4IBg\\rscr141xfy.js";
 				import * as __MIDDLEWARE_0__ from "C:\\Users\\jjohns\\remix\\conmix-jacobjohns-com\\node_modules\\wrangler\\templates\\middleware\\middleware-miniflare3-json-error.ts";
 				const envWrappers = [__MIDDLEWARE_0__.wrap].filter(Boolean);
 				const facade = {
@@ -9,7 +9,7 @@
             ...(worker.middleware ? worker.middleware : []),
 					].filter(Boolean)
 				}
-				export * from "C:\\Users\\jjohns\\remix\\conmix-jacobjohns-com\\.wrangler\\tmp\\pages-lclUV5\\eymale2qrbr.js";
+				export * from "C:\\Users\\jjohns\\remix\\conmix-jacobjohns-com\\.wrangler\\tmp\\pages-tX4IBg\\rscr141xfy.js";
 
 				const maskDurableObjectDefinition = (cls) =>
 					class extends cls {
