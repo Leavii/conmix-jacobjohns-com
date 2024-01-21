@@ -1,4 +1,5 @@
 import type { LinksFunction } from "@remix-run/cloudflare";
+import appStyles from "~/styles/app.css";
 import { cssBundleHref } from "@remix-run/css-bundle";
 import {
   Form,
@@ -12,6 +13,7 @@ import {
 
 export const links: LinksFunction = () => [
   ...(cssBundleHref ? [{ rel: "stylesheet", href: cssBundleHref }] : []),
+  { rel: "stylesheet", href: appStyles },
 ];
 
 export default function App() {
